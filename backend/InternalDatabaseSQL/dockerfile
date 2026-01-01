@@ -1,0 +1,14 @@
+# Use the official PostgreSQL 16.11 image as a base
+FROM postgres:16.11
+
+# Set environment variables for database
+# https://hub.docker.com/_/postgres#postgres_initdb_args
+ENV POSTGRES_USER=admin
+ENV POSTGRES_PASSWORD=admin
+ENV POSTGRES_DB=company
+
+# Copy schema initialization script into the Docker container
+COPY init-db.sql /docker-entrypoint-initdb.d/
+
+# Expose port for PostgreSQL (default port)
+EXPOSE 5432
