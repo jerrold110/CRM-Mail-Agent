@@ -5,7 +5,6 @@ docker start int_db
 
 #docker exec -it int_db bash
 docker exec -it int_db psql -U admin -d company
-
 docker stop int_db
 
 #### Postgres commands ####

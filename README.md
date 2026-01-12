@@ -12,5 +12,8 @@ A Multi-agent system that handles customer support emails
 6. Staff reviews email draft, approves email
 7. CRM sends AI prepared email response to client
 
+### Agent Process
+![System diagram](images/agentProcess.png "Optional title")
+
 ### Agent diagram
 ![System diagram](images/agentGraph.png "Optional title")
