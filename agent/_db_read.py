@@ -1,5 +1,5 @@
 import asyncio
-import asyncpg
+import asyncpg # Supposedly better performance than psycopg, does not block the thread 
 
 from pydantic import BaseModel, Field
 from typing import Literal
@@ -30,14 +30,25 @@ async def get_shoe_characteristics():
 class ProuctIdInput(BaseModel):
     productId: int
 
-#@tool(args_schema=ProuctIdInput)
-async def get_product_availability(productId: int) -> str:
+
+@tool(args_schema=ProuctIdInput)
+def get_product_availability(productId: int) -> str: # This function is the synchronous wrapper for an asynchronous function
     """
     Get the inventory of a product from the database by id and get: 
     product_name, size, quantity
 
     If there are no stocks of the product or its quantity is 0, check the incoming deliveries and get:
     product_name, size, quantity, expected_date
+
+    Args:
+        productId: Product Id
+    """
+    response = asyncio.run(_get_product_availability(productId=productId))
+    return response
+
+async def _get_product_availability(productId: int) -> str:
+    """
+    Get the inventory of a product from the database by id. If there are no stocks of the product or its quantity is 0, check the incoming deliveries
 
     Args:
         productId: Product Id
@@ -120,5 +131,5 @@ async def get_product_availability(productId: int) -> str:
 # test
 if __name__ == "__main__":
     productId = 3
-    x = asyncio.run(get_product_availability(productId=productId))
+    x = get_product_availability(productId=productId) #asyncio.run(get_product_availability(productId=productId))
     print(x)
