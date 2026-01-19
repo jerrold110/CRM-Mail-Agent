@@ -1,3 +1,6 @@
+-- For agent memory
+CREATE DATABASE agent_memory;
+
 -- Create the shoe_characteristics table
 CREATE TABLE public.shoe_characteristics (
     product_id INT PRIMARY KEY,

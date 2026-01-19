@@ -30,7 +30,6 @@ async def get_shoe_characteristics():
 class ProuctIdInput(BaseModel):
     productId: int
 
-
 @tool(args_schema=ProuctIdInput)
 def get_product_availability(productId: int) -> str: # This function is the synchronous wrapper for an asynchronous function
     """
@@ -43,10 +42,12 @@ def get_product_availability(productId: int) -> str: # This function is the sync
     Args:
         productId: Product Id
     """
-    response = asyncio.run(_get_product_availability(productId=productId))
-    return response
+    #response = asyncio.run(a_get_product_availability(productId=productId))
+    #return response
+    pass
 
-async def _get_product_availability(productId: int) -> str:
+@tool(args_schema=ProuctIdInput)
+async def a_get_product_availability(productId: int) -> str:
     """
     Get the inventory of a product from the database by id. If there are no stocks of the product or its quantity is 0, check the incoming deliveries
 
@@ -95,38 +96,6 @@ async def _get_product_availability(productId: int) -> str:
     await conn.close()
     return f"There are no stocks or incoming deliveries of product id {str(productId)}"
 
-# @tool(args_schema=ProuctIdListInput)
-# async def get_incoming_deliveries(productIds: list[int]) -> str:
-#     """
-#     Get incoming deliveries for a list of product ids from the database by: 
-#     product_name, quantity, expected_date
-#     """
-#     conn = await asyncpg.connect(user='admin', password='admin',
-#                                 database='company', host='127.0.0.1')
-#     values = await conn.fetch(
-#         f"""
-#         SELECT product_id, product_name, quantity
-#         FROM incoming_deliveries a 
-#             LEFT JOIN inventory b
-#         WHERE product_id IN {tuple(productIds)}
-#         """
-#     )
-
-#     await conn.close()
-#     header = "product_id,product_name,quantity\n"
-
-#     if not values:
-#         return None
-    
-#     for row in values:
-#         row_data = []
-#         row_data.append(str(row['product_id']))
-#         row_data.append(row['product_name'])
-#         row_data.append(str(row['quantity']))
-#         row_data_str = ",".join(row_data) + "\n"
-#         header += row_data_str
-
-#     return header
 
 # test
 if __name__ == "__main__":
