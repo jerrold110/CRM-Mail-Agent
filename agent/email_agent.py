@@ -3,49 +3,24 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from typing import TypedDict, Literal, Annotated
-from langchain.messages import AnyMessage
-import operator
-
-# Define the state
-class EmailCharacteristics(TypedDict):
-    topic: Literal["transaction_inquiry", "product_availability_inquiry", "product_recommendation_request", "delivery_complaint", "billing_dispute", "other"]
-    urgency: Literal["low", "medium", "high", "critical"]
-    summary: str
-
-class EmailAgentState(TypedDict):
-    # Email characteristics
-    classification: EmailCharacteristics | None
-
-    # Email data 
-    customer_name: str
-    customer_id: int
-    case_id: int
-    email_content: str
-    email_summary_history: str | None # Used when Email history provides context; such as when answering a request for more information to process action
-
-    # LLM messages. Follow up actions should be more deterministic after the initial observation steps by the agent. These actions use specific state fields for follow-up actions
-    # Refer to message with .content
-    messages: Annotated[list[AnyMessage], operator.add]
-
-    # Email response
-    email_response: str
-    email_response_summary: str
-    # Context gathered from system. Will be included in source reflected to user.
-    context: Annotated[list[str], operator.add]
-    # Actions to be taken after human review
-    actions: Annotated[list[str], operator.add] | None
-
 
 # Define the Nodes of the agent
-
 from langgraph.graph import StateGraph, START, END
 from langgraph.types import interrupt, Command, RetryPolicy
 from langchain_openai import ChatOpenAI
 from langchain.messages import HumanMessage, SystemMessage, AIMessage, ToolMessage
 import asyncio
 
+# Graph State imports
+from _state import EmailCharacteristics, EmailAgentState, DeliveryInfo
+
+# Import tools
+from _db_read_tools import get_shoe_characteristics, get_product_availability, get_customer_open_deliveries
+
+# Import agent memory functions
 from _agent_memory_crud import update_customer_support_history, read_customer_support_history, delete_customer_support_history
 
+# Setup
 llm = ChatOpenAI(
     model="gpt-4.1-mini",
     temperature=0.5)
@@ -54,23 +29,24 @@ summary_llm = ChatOpenAI(
     model="gpt-4.1-nano",
     temperature=0.5)
 
-from _db_read import get_shoe_characteristics, a_get_product_availability
-
-tools = [a_get_product_availability]
+tools = [get_product_availability]
 tools_by_name = {tool.name: tool for tool in tools}
 
 llm_check_inventory_with_tools = ChatOpenAI(
     model="gpt-4.1-mini",
     temperature=0.5).bind_tools(tools)
 
-async def classify_email(state: EmailAgentState) -> Command[Literal["find_closest_product"]]:
+# Nodes
+async def classify_email(state: EmailAgentState) -> Command[Literal["find_closest_product", "find_customer_order"]]:
     """
     Use LLM to classify email topic and urgency, then route accordingly. 
+
+    Reads from memory to classify correctly and updates memory.
     """
 
     structured_llm = llm.with_structured_output(EmailCharacteristics)
     
-    conversation_summary = await read_customer_support_history(state['customer_id'], state['case_id']) # Dict or none
+    conversation_summary = None #= await read_customer_support_history(state['customer_id'], state['case_id']) # Dict or none
 
     if not conversation_summary:
         conversation_summary_formatted = "No history available"
@@ -82,36 +58,38 @@ async def classify_email(state: EmailAgentState) -> Command[Literal["find_closes
     Analyze this email and classify it. Use the email conversation history to gain context on this email if necessary
 
     Email: 
-    {state['email_content']}
+    {state.email_content}
 
     Email history summary:
     {conversation_summary_formatted}
         
     Provide classification including topic, urgency, and provide a summary. 
     """
-    print(classification_prompt); exit(1)
 
     # Get structured response directly as dict
     classification = await structured_llm.ainvoke(classification_prompt)
 
     # Update memory with summary of customer email
-    await update_customer_support_history(
-        state['customer_id'],
-        state['case_id'],
-        classification['summary'],
-        conversation_summary,       # None or a dictionary
-        True)
+    # await update_customer_support_history(
+    #     state['customer_id'],
+    #     state['case_id'],
+    #     classification['summary'],
+    #     conversation_summary,       # None or a dictionary
+    #     True)
 
     # Determine next node based on classification
-    if classification['topic'] == 'product_availability_inquiry':
+    if classification.topic == 'product_availability_inquiry':
         goto = "find_closest_product"
-    elif classification['topic'] == 'product_recommendation_request':
+    elif classification.topic == 'product_recommendation_request':
         goto = "find_closest_product"
+    elif classification.topic == 'delivery_complaint':
+        goto = 'find_customer_order'
     else:
         goto = "other"
     
-    print(classification['summary'])
-    print(classification['topic'])
+    print("Summary:", classification.topic)
+    print("Classification:" ,classification.topic)
+    print(goto)
 
     # Update state data and select the next node (goto)
     return Command(
@@ -125,17 +103,45 @@ async def find_closest_product(state: EmailAgentState) -> Command[Literal["check
     """
     # Identify what the product being searched for is by checking product features database
     # asyncio.run(get_shoe_characteristics()) is wrong for asynchronous programming
-    product_characteristics = await get_shoe_characteristics()  
+    product_characteristics = await get_shoe_characteristics() 
 
     product_match_prompt = f"""
     Match the products the client is looking for in their email to the closest products we have in our product catalogue. Tell me what the client is looking for and the ids of the matching products.
 
-    Client email: {state['email_content']}
+    Client email: {state.email_content}
 
     Product catalogue: {product_characteristics}
     """
 
     response = await llm.ainvoke(product_match_prompt) # AIMessage type
+
+    return Command(
+        update={"messages": [AIMessage(content=response.content)]},    # Adds to messages not replace. We are not using [response] because we don't want to save the response metadata to the state
+        goto="check_inventory_llm_call"
+    )
+
+async def find_customer_order(state: EmailAgentState): # -> Command[Literal["check_inventory_llm_call"]]:
+    """
+    Prompt the LLM to extract the the delivery_ids or tracking_numbers provided by the customer.
+    """
+    # Identify what the product being searched for is by checking product features database
+    # asyncio.run(get_shoe_characteristics()) is wrong for asynchronous programming
+
+    product_characteristics = await get_customer_open_deliveries(state.customer_id)  
+
+    product_match_prompt = f"""
+    Identify the delivery ids or tracking numbers in the client's email. The customer must explicitly mention that it is a delivery id or a tracking number, if not mentioned, ignore it
+
+    Client email: 
+    {state.email_content}
+    """
+
+    structured_llm = llm.with_structured_output(DeliveryInfo)
+
+    response = await structured_llm.ainvoke(product_match_prompt) # AIMessage type
+
+    print(response)
+    exit(0)
 
     return Command(
         update={"messages": [AIMessage(content=response.content)]},    # Adds to messages not replace. We are not using [response] because we don't want to save the response metadata to the state
@@ -167,7 +173,7 @@ async def check_inventory_llm_call(state: EmailAgentState):
     It will append a new message that summarizes the findings and has no more tool call instructions
     """
     response = await llm_check_inventory_with_tools.ainvoke(
-        [SystemMessage(content=agent_message)] + state['messages']
+        [SystemMessage(content=agent_message)] + state.messages
     )
     
     return {
@@ -177,7 +183,7 @@ async def check_inventory_llm_call(state: EmailAgentState):
 def conditional_edge_check_inventory(state: EmailAgentState) -> Literal["check_inventory_tool_node", "write_response"]:
     """Decide if we should continue the loop or stop based upon whether the LLM made a tool call"""
 
-    messages = state["messages"]
+    messages = state.messages
     last_message = messages[-1]
     
 
@@ -190,7 +196,7 @@ async def check_inventory_tool_node(state: EmailAgentState):
     """
     This node performs the tool calls for get_inventory_stock and get_incoming_deliveries
     """
-    tool_call_message = state["messages"][-1].tool_calls
+    tool_call_message = state.messages[-1].tool_calls
 
     message_result = []
     context_result = []
@@ -210,8 +216,8 @@ async def write_response(state: EmailAgentState) -> Command[Literal["send_respon
     Write email to the customer that achieves the objective and responds to the customer email
     """
 
-    classification = state.get('classification', {})
-    email_topic = classification.get('topic', 'unknown')
+    classification = state.classification
+    email_topic = 'unknown' if classification.topic == None else classification.topic
 
     email_objective = {
         "other": None,
@@ -219,25 +225,26 @@ async def write_response(state: EmailAgentState) -> Command[Literal["send_respon
         "product_recommendation_request": "The customer has asked for a recommendation based on certain criteria. Tell the customer that these products are the closest match to what they are looking for and their availability"
     }
 
-    if state.get('context'):
-        formatted_context = "\n".join([f"- {doc}" for doc in state['context']])
+    if state.context != None:
+        formatted_context = "\n".join([f"- {doc}" for doc in state.context])
 
     # Build the prompt with formatted context
     draft_prompt = f"""
-    {email_objective}.
-    The customer's name is: {state['customer_name']}
-    Draft a reply to this customer email:
-    {state['email_content']}
+{email_objective[email_topic]}.
+The customer's name is: {state.customer_name}
+Draft a reply to this customer email:
+{state.email_content}
 
-    Relevant context:
-    {formatted_context}
+Relevant context:
+{formatted_context}
 
-    Guidelines:
-    - Be professional and helpful
-    - Address their specific concern
-    - Use the provided context when relevant
-    - Sign off the email as Customer Service Team
-    """
+Guidelines:
+- Be professional and helpful
+- Address their specific concern
+- Use the provided context when relevant
+- Sign off the email as Customer Service Team
+"""
+
     email_response = await llm.ainvoke(draft_prompt)
 
     # Get the summary with 4.1 micro
@@ -266,10 +273,10 @@ async def send_response_to_backend(state: EmailAgentState):
     - Actions
     
     """
-    print(state['email_response_summary'])
-    print(state['email_response'])
-    print(state['context'])
-    print(state.get('actions', None))
+    print(state.email_response_summary)
+    print(state.email_response)
+    print(state.context)
+    print(state.actions)
 
     return {}
 
@@ -281,14 +288,18 @@ workflow = StateGraph(EmailAgentState)
 # Add nodes with appropriate error handling
 workflow.add_node("classify_email", classify_email)
 workflow.add_node("find_closest_product", find_closest_product)
+workflow.add_node("find_customer_order", find_customer_order)
+
 workflow.add_node("check_inventory_llm_call", check_inventory_llm_call)
 workflow.add_node("check_inventory_tool_node", check_inventory_tool_node)
 workflow.add_node("write_response", write_response)
 workflow.add_node("send_response_to_backend", send_response_to_backend)
 
+
+
 # Add only the essential edges
 workflow.add_edge(START, "classify_email")
-workflow.add_edge("classify_email", "find_closest_product")
+
 workflow.add_edge("find_closest_product", "check_inventory_llm_call")
 workflow.add_conditional_edges(
     "check_inventory_llm_call",
@@ -309,26 +320,33 @@ async def main():
         print(f"Graph exited")
 
 if __name__ == '__main__':
+
+    product_availability_email = """
+        Dear Sir/Madam,
+
+        I would like to inquire the availability of red leather shoes
+
+        Regards,
+        Michael
+    """
+    delivery_delay_email = """
+    Dear sir/madam,
+
+    I would like to ask why my deliveries with id 123 and 444 have been delayed 
+
+    """
     # Test the agent
     initial_state = {
         "customer_name": "Michael",
 
-        "customer_id": "customer_123",
+        "customer_id": 1,
 
-        "case_id": "1000",
+        "case_id": 1000,
 
-        "email_content": 
-        """
-        Dear Sir/Madam,
-
-        I would like to inquire if you have any red leather shoes.
-
-        Regards,
-        Michael
-        """
+        "email_content": delivery_delay_email 
     }
     
     asyncio.run(main())
 
     # Reset memory
-    delete_customer_support_history("customer_123", "1000")
+    #delete_customer_support_history("customer_123", "1000")

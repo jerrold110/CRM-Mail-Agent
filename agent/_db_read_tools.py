@@ -27,27 +27,42 @@ async def get_shoe_characteristics():
 
     return shoe_char_data_str
 
+async def get_customer_open_deliveries(customer_id: int):
+    """
+    
+    """
+    assert isinstance(customer_id, int)
+    conn = await asyncpg.connect(user='admin', password='admin',
+                                database='company', host='127.0.0.1')
+    values = await conn.fetch(
+        f"""
+        SELECT
+            status, delivery_id, tracking_number, expected_delivery_end, shipped_date, actual_delivery_date
+        FROM item_deliveries 
+        WHERE customer_id = {str(customer_id)}
+            AND status IN ('processing', 'in_transit', 'out_for_delivery', 'exception')
+        """
+    )
+    await conn.close()
+    shoe_char_data_str = "status,delivery_id,tracking_number,expected_delivery_end,shipped_date,actual_delivery_date\n"
+    for row in values:
+        row_data = []
+        row_data.append(row['status'])
+        row_data.append(str(row['delivery_id']))
+        row_data.append(row['tracking_number'])
+        row_data.append(str(row['expected_delivery_end']))
+        row_data.append(str(row['shipped_date']))
+        row_data.append(str(row['actual_delivery_date']))
+        row_data_str = ",".join(row_data) + "\n"
+        shoe_char_data_str += row_data_str
+
+    return shoe_char_data_str
+
 class ProuctIdInput(BaseModel):
     productId: int
 
 @tool(args_schema=ProuctIdInput)
-def get_product_availability(productId: int) -> str: # This function is the synchronous wrapper for an asynchronous function
-    """
-    Get the inventory of a product from the database by id and get: 
-    product_name, size, quantity
-
-    If there are no stocks of the product or its quantity is 0, check the incoming deliveries and get:
-    product_name, size, quantity, expected_date
-
-    Args:
-        productId: Product Id
-    """
-    #response = asyncio.run(a_get_product_availability(productId=productId))
-    #return response
-    pass
-
-@tool(args_schema=ProuctIdInput)
-async def a_get_product_availability(productId: int) -> str:
+async def get_product_availability(productId: int) -> str:
     """
     Get the inventory of a product from the database by id. If there are no stocks of the product or its quantity is 0, check the incoming deliveries
 
@@ -99,6 +114,6 @@ async def a_get_product_availability(productId: int) -> str:
 
 # test
 if __name__ == "__main__":
-    productId = 3
-    x = get_product_availability(productId=productId) #asyncio.run(get_product_availability(productId=productId))
+    param = 2
+    x = asyncio.run(get_customer_open_deliveries(param))
     print(x)

@@ -83,3 +83,85 @@ VALUES
     (2, 50, '2026-01-15', 'Nike Distributor'),
     (3, 30, '2026-01-20', 'Adidas Warehouse'),
     (3, 30, '2026-01-20', 'Adidas Warehouse');
+
+
+-- Create the item_deliveries table
+CREATE TABLE public.item_deliveries (
+    delivery_id INT PRIMARY KEY,
+    order_id INT NOT NULL,
+    customer_id INT NOT NULL,
+    product_id INT NOT NULL,
+    origin VARCHAR(100) NOT NULL,
+    destination VARCHAR(200) NOT NULL,
+    carrier VARCHAR(50),
+    tracking_number VARCHAR(100),
+    status VARCHAR(50) NOT NULL CHECK (status IN ('processing', 'in_transit', 'out_for_delivery', 'delivered', 'exception', 'cancelled')),
+    expected_delivery_start DATE NOT NULL,
+    expected_delivery_end DATE NOT NULL,
+    actual_delivery_date DATE,
+    shipped_date DATE,
+    delivery_attempts INT DEFAULT 0
+);
+
+-- Insert sample delivery data present date is january 20 2024
+INSERT INTO public.item_deliveries (
+    delivery_id, order_id, customer_id, product_id, 
+    origin, destination, carrier, tracking_number, status,
+    expected_delivery_start, expected_delivery_end, actual_delivery_date, 
+    shipped_date, delivery_attempts
+) VALUES
+    -- On-time deliveries
+    (0, 0, 0, 0,
+     'Warehouse A - California', '123 Main St, New York, NY 10001', 'FedEx', 'FDX123456789',
+     'delivered', '2024-01-15', '2024-01-17', '2024-01-16', '2024-01-13', 0),
+    
+    (1, 1, 1, 1,
+     'Warehouse B - Texas', '456 Oak Ave, Seattle, WA 98101', 'UPS', 'UPS987654321',
+     'delivered', '2024-01-16', '2024-01-18', '2024-01-17', '2024-01-14', 0),
+    
+    -- Late deliveries
+    (2, 2, 2, 2,
+     'Warehouse A - California', '789 Pine Rd, Austin, TX 78701', 'USPS', 'USPS456789123',
+     'delivered', '2024-01-10', '2024-01-12', '2024-01-15', '2024-01-08', 2),
+    
+    (3, 3, 0, 3,
+     'Warehouse B - Texas', '123 Main St, New York, NY 10001', 'FedEx', 'FDX111222333',
+     'delivered', '2024-01-18', '2024-01-20', '2024-01-23', '2024-01-16', 1),
+    
+    -- In transit
+    (4, 4, 3, 4,
+     'Warehouse C - New Jersey', '321 Elm St, Miami, FL 33101', 'UPS', 'UPS555666777',
+     'in_transit', '2024-01-20', '2024-01-22', NULL, '2024-01-18', 0),
+    
+    (5, 5, 4, 5,
+     'Warehouse A - California', '654 Maple Dr, Portland, OR 97201', 'FedEx', 'FDX888999000',
+     'in_transit', '2024-01-19', '2024-01-21', NULL, '2024-01-17', 0),
+     
+    -- customer 2 has a late delivery and a delivery that is currently late
+    (11, 11, 2, 3,
+     'Warehouse B - Texas', '123 Main St, New York, NY 10001', 'FedEx', 'FDX111222334',
+     'in_transit', '2024-01-19', '2024-01-21', NULL, '2024-01-17', 0),
+    
+    -- Delayed in transit
+    (6, 6, 2, 6,
+     'Warehouse B - Texas', '789 Pine Rd, Austin, TX 78701', 'USPS', 'USPS777888999',
+     'in_transit', '2024-01-17', '2024-01-19', NULL, '2024-01-15', 0),
+    
+    -- Out for delivery
+    (7, 7, 5, 7,
+     'Warehouse C - New Jersey', '159 Birch Ln, Boston, MA 02101', 'UPS', 'UPS321654987',
+     'out_for_delivery', '2024-01-20', '2024-01-22', NULL, '2024-01-18', 1),
+    
+    -- Processing/not shipped yet
+    (8, 8, 6, 8,
+     'Warehouse A - California', '753 Cedar St, Denver, CO 80201', 'FedEx', NULL,
+     'processing', '2024-01-23', '2024-01-25', NULL, NULL, 0),
+    
+    -- Exception/problem deliveries
+    (9, 9, 0, 9,
+     'Warehouse B - Texas', '123 Main St, New York, NY 10001', 'UPS', 'UPS147258369',
+     'exception', '2024-01-14', '2024-01-16', NULL, '2024-01-12', 3),
+    
+    (10, 10, 7, 10,
+     'Warehouse C - New Jersey', '951 Spruce Ave, Chicago, IL 60601', 'FedEx', 'FDX963852741',
+     'exception', '2024-01-18', '2024-01-20', NULL, '2024-01-16', 1);
