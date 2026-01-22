@@ -6,12 +6,11 @@ from langchain.messages import AnyMessage
 # Define the state
 class EmailCharacteristics(BaseModel):
     topic: Literal["transaction_inquiry", "product_availability_inquiry", "product_recommendation_request", "delivery_complaint", "billing_dispute", "other"]
-    urgency: Literal["low", "medium", "high"]
+    urgency: Literal["low", "medium", "high", "urgent"]
     summary: str
 
 class DeliveryInfo(BaseModel):
-    delivery_id: list[int] | None
-    tracking_numer: list[str] | None
+    tracking_number: list[str] = Field(default_factory=list)
 
 class EmailAgentState(BaseModel):
     # Email data 
@@ -35,6 +34,6 @@ class EmailAgentState(BaseModel):
     # Context gathered from system. Will be included in source reflected to user.
     context: Annotated[list[str], operator.add] = Field(default_factory=list)
     # Actions to be taken after human review
-    actions: Annotated[list[str], operator.add] = Field(default_factory=list)
+    actions: Annotated[list[dict], operator.add] = Field(default_factory=list)
 
 

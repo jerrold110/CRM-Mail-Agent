@@ -11,10 +11,11 @@ async def update_customer_support_history(
         message_history: dict,
         from_customer:bool=True):
     """
+    Namespace and key have to be strings
     """
     assert message_history is None or isinstance(message_history, dict)
-    namespace = ("email_conversation_history", customer_id)
-    key = case_id
+    namespace = ("email_conversation_history", str(customer_id))
+    key = str(case_id)
     if from_customer:
         memory_value = f"Customer: {message}"
     else:
@@ -36,8 +37,8 @@ async def read_customer_support_history(customer_id: int, case_id:int) -> dict |
     """
     Do not block the event loop as this function is executed at scale 
     """
-    namespace = ("email_conversation_history", customer_id)
-    key = case_id
+    namespace = ("email_conversation_history", str(customer_id))
+    key = str(case_id)
 
     with (
         PostgresStore.from_conn_string(DB_URI) as store,  
@@ -45,7 +46,6 @@ async def read_customer_support_history(customer_id: int, case_id:int) -> dict |
     ):
         
         result = await store.aget(namespace=namespace, key=key)
-        print(f"Memory result: {result}")
         if result:
             return result.value # exctract the data as a dictionary
         return None
@@ -56,8 +56,8 @@ def delete_customer_support_history(
     ):
     """
     """
-    namespace = ("email_conversation_history", customer_id)
-    key = case_id
+    namespace = ("email_conversation_history", str(customer_id))
+    key = str(case_id)
 
     with (
         PostgresStore.from_conn_string(DB_URI) as store,  

@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 from typing import Literal
 
 from langchain.tools import tool
+from datetime import datetime, date
 
 async def get_shoe_characteristics():
     conn = await asyncpg.connect(user='admin', password='admin',
@@ -14,45 +15,15 @@ async def get_shoe_characteristics():
     )
 
     await conn.close()
-    shoe_char_data_str = "product_id,color,material,brand,description\n"
+    shoe_char_data_str = "product_id,size,color,material,brand,description\n"
     for row in values:
         row_data = []
         row_data.append(str(row['product_id']))
+        row_data.append(str(row['size']))
         row_data.append(row['color'])
         row_data.append(row['material'])
         row_data.append(row['brand'])
         row_data.append(row['description'])
-        row_data_str = ",".join(row_data) + "\n"
-        shoe_char_data_str += row_data_str
-
-    return shoe_char_data_str
-
-async def get_customer_open_deliveries(customer_id: int):
-    """
-    
-    """
-    assert isinstance(customer_id, int)
-    conn = await asyncpg.connect(user='admin', password='admin',
-                                database='company', host='127.0.0.1')
-    values = await conn.fetch(
-        f"""
-        SELECT
-            status, delivery_id, tracking_number, expected_delivery_end, shipped_date, actual_delivery_date
-        FROM item_deliveries 
-        WHERE customer_id = {str(customer_id)}
-            AND status IN ('processing', 'in_transit', 'out_for_delivery', 'exception')
-        """
-    )
-    await conn.close()
-    shoe_char_data_str = "status,delivery_id,tracking_number,expected_delivery_end,shipped_date,actual_delivery_date\n"
-    for row in values:
-        row_data = []
-        row_data.append(row['status'])
-        row_data.append(str(row['delivery_id']))
-        row_data.append(row['tracking_number'])
-        row_data.append(str(row['expected_delivery_end']))
-        row_data.append(str(row['shipped_date']))
-        row_data.append(str(row['actual_delivery_date']))
         row_data_str = ",".join(row_data) + "\n"
         shoe_char_data_str += row_data_str
 
@@ -111,9 +82,91 @@ async def get_product_availability(productId: int) -> str:
     await conn.close()
     return f"There are no stocks or incoming deliveries of product id {str(productId)}"
 
+async def get_current_date():
+    """
+    The current date for delivery complaint workflows. 20th Jan 2024
+    """
+    return date(2024,1,20) # should be datetime not date
+
+async def get_customer_open_deliveries(customer_id: int) -> list[tuple]:
+    """
+    
+    """
+    assert isinstance(customer_id, int)
+    conn = await asyncpg.connect(user='admin', password='admin',
+                                database='company', host='127.0.0.1')
+    values = await conn.fetch(
+        f"""
+        SELECT
+            status, delivery_id, tracking_number, expected_delivery_end, shipped_date, actual_delivery_date
+        FROM item_deliveries 
+        WHERE customer_id = {str(customer_id)}
+            AND status IN ('processing', 'in_transit', 'out_for_delivery', 'exception')
+        """
+    )
+    await conn.close()
+    open_deliveries = []
+    for row in values:
+        delivery = (
+            str(row['status']),
+            int(row['delivery_id']),
+            str(row['tracking_number']),
+            row['expected_delivery_end'],
+            row['shipped_date'],
+            row['actual_delivery_date']
+        )
+        open_deliveries.append(delivery)
+
+    return open_deliveries
+
+async def is_coupon_redeemed(customer_id, delivery_id):
+    """
+    Determine if the coupon has been created for a late delivery,
+    if yes it would have been created in the database
+    """
+    conn = await asyncpg.connect(user='admin', password='admin',
+                                database='company', host='127.0.0.1')
+    values = await conn.fetch(
+        f"""
+        SELECT
+            coupon_id, customer_id, delivery_id
+        FROM coupon_issued
+        WHERE customer_id = {str(customer_id)} AND delivery_id = {str(delivery_id)}
+        """
+    )
+    await conn.close()
+
+    if not values:
+        return False
+    return True
+
+async def late_delivery_last60d(customer_id):
+    """
+    Current day is 2024-01-20
+    """
+    conn = await asyncpg.connect(user='admin', password='admin',
+                                database='company', host='127.0.0.1')
+    values = await conn.fetch(
+        f"""
+        SELECT
+            *
+        FROM item_deliveries 
+        -- late deliveries in last 60 days
+        WHERE actual_delivery_date > expected_delivery_end 
+            AND (actual_delivery_date + INTERVAL '60 days') > '2024-01-20'
+            AND actual_delivery_date IS NOT NULL
+            AND customer_id = {str(customer_id)}
+        """
+    )
+    await conn.close()
+
+    if not values:
+        return False
+    return True
 
 # test
 if __name__ == "__main__":
-    param = 2
-    x = asyncio.run(get_customer_open_deliveries(param))
-    print(x)
+    param = 3
+    #x = asyncio.run(get_customer_open_deliveries(param))
+    #print(x)
+    print(asyncio.run(late_delivery_last60d(param)))

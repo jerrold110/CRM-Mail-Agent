@@ -138,11 +138,11 @@ INSERT INTO public.item_deliveries (
      'in_transit', '2024-01-19', '2024-01-21', NULL, '2024-01-17', 0),
      
     -- customer 2 has a late delivery and a delivery that is currently late
-    (11, 11, 2, 3,
+    (11, 11, 2, 3, 
      'Warehouse B - Texas', '123 Main St, New York, NY 10001', 'FedEx', 'FDX111222334',
      'in_transit', '2024-01-19', '2024-01-21', NULL, '2024-01-17', 0),
     
-    -- Delayed in transit
+    -- Delayed in transit, will be late
     (6, 6, 2, 6,
      'Warehouse B - Texas', '789 Pine Rd, Austin, TX 78701', 'USPS', 'USPS777888999',
      'in_transit', '2024-01-17', '2024-01-19', NULL, '2024-01-15', 0),
@@ -165,3 +165,16 @@ INSERT INTO public.item_deliveries (
     (10, 10, 7, 10,
      'Warehouse C - New Jersey', '951 Spruce Ave, Chicago, IL 60601', 'FedEx', 'FDX963852741',
      'exception', '2024-01-18', '2024-01-20', NULL, '2024-01-16', 1);
+
+CREATE TABLE coupon_issued (
+    coupon_id INT PRIMARY KEY,
+    customer_id INT NOT NULL,
+    delivery_id INT NOT NULL,
+    coupon_code VARCHAR(50) NOT NULL,
+    issue_date DATE NOT NULL,
+    expiry_date DATE NOT NULL
+);
+
+INSERT INTO coupon_issued (
+    coupon_id, customer_id, delivery_id, coupon_code, issue_date, expiry_date) VALUES
+    (0, 0, 3, 'EXPEDITE2024-001', '2024-01-02', '2024-04-02');
