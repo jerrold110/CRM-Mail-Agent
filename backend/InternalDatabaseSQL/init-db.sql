@@ -137,11 +137,6 @@ INSERT INTO public.item_deliveries (
      'Warehouse A - California', '654 Maple Dr, Portland, OR 97201', 'FedEx', 'FDX888999000',
      'in_transit', '2024-01-19', '2024-01-21', NULL, '2024-01-17', 0),
      
-    -- customer 2 has a late delivery and a delivery that is currently late
-    (11, 11, 2, 3, 
-     'Warehouse B - Texas', '123 Main St, New York, NY 10001', 'FedEx', 'FDX111222334',
-     'in_transit', '2024-01-19', '2024-01-21', NULL, '2024-01-17', 0),
-    
     -- Delayed in transit, will be late
     (6, 6, 2, 6,
      'Warehouse B - Texas', '789 Pine Rd, Austin, TX 78701', 'USPS', 'USPS777888999',

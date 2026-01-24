@@ -3,6 +3,10 @@ from langgraph.store.postgres import PostgresStore
 import asyncio
 
 DB_URI = "postgresql://admin:admin@localhost:5432/agent_memory?sslmode=disable"
+"""
+https://reference.langchain.com/python/langgraph/store/#langgraph.store.postgres.PostgresStore
+
+"""
 
 async def update_customer_support_history(
         customer_id:int, 
@@ -12,14 +16,15 @@ async def update_customer_support_history(
         from_customer:bool=True):
     """
     Namespace and key have to be strings
+    Passing the entire history prevents unnecessary reading from the database
     """
     assert message_history is None or isinstance(message_history, dict)
     namespace = ("email_conversation_history", str(customer_id))
     key = str(case_id)
     if from_customer:
-        memory_value = f"Customer: {message}"
+        memory_value = f"{message}"
     else:
-        memory_value = f"Customer Service: {message}"
+        memory_value = f"{message}"
 
     with (
         PostgresStore.from_conn_string(DB_URI) as store,  
@@ -69,13 +74,10 @@ def delete_customer_support_history(
     
 
 if __name__ == "__main__":
-    cust = '001'
-    case = '001'
+    cust = '404'
+    case = '404'
 
-    asyncio.run(update_customer_support_history(cust , case, 'Some message 1', None, False))
-    convo_data = asyncio.run(read_customer_support_history(cust, case))
-    asyncio.run(update_customer_support_history(cust , case, 'Some message 2', convo_data, True))
-    convo_data = asyncio.run(read_customer_support_history(cust, case))
 
     # delete_customer_support_history(cust, case)
-    # asyncio.run(read_customer_support_history(cust, case))
+    x = asyncio.run(read_customer_support_history(404, 404))
+    print(x)

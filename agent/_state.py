@@ -5,7 +5,7 @@ from langchain.messages import AnyMessage
 
 # Define the state
 class EmailCharacteristics(BaseModel):
-    topic: Literal["transaction_inquiry", "product_availability_inquiry", "product_recommendation_request", "delivery_complaint", "billing_dispute", "other"]
+    topic: Literal["transaction_inquiry", "product_availability_inquiry", "product_recommendation_request", "delivery_delay", "billing_dispute", "other"]
     urgency: Literal["low", "medium", "high", "urgent"]
     summary: str
 

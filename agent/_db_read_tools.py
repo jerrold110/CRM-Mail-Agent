@@ -7,6 +7,26 @@ from typing import Literal
 from langchain.tools import tool
 from datetime import datetime, date
 
+async def get_unique_list(f: str):
+    conn = await asyncpg.connect(user='admin', password='admin',
+                                database='company', host='127.0.0.1')
+    
+    query = f"""
+    SELECT DISTINCT({f}) AS field 
+    FROM shoe_characteristics
+    """
+    values = await conn.fetch(query)
+
+    await conn.close()
+    
+    fields = []
+    for row in values:
+        fields.append(str(row['field']))
+
+
+    return ", ".join(fields)
+
+# These two functions can be optimised further to reduce token usage
 async def get_shoe_characteristics():
     conn = await asyncpg.connect(user='admin', password='admin',
                                 database='company', host='127.0.0.1')
@@ -15,6 +35,33 @@ async def get_shoe_characteristics():
     )
 
     await conn.close()
+    
+    shoe_char_data_str = "product_id,size,color,material,brand,description\n"
+    for row in values:
+        row_data = []
+        row_data.append(str(row['product_id']))
+        row_data.append(str(row['size']))
+        row_data.append(row['color'])
+        row_data.append(row['material'])
+        row_data.append(row['brand'])
+        row_data.append(row['description'])
+        row_data_str = ",".join(row_data) + "\n"
+        shoe_char_data_str += row_data_str
+
+    return shoe_char_data_str
+
+async def get_query_shoe_characteristics(sql_query: str):
+    conn = await asyncpg.connect(user='admin', password='admin',
+                                database='company', host='127.0.0.1')
+    values = await conn.fetch(
+        sql_query
+    )
+
+    await conn.close()
+
+    if not values:
+        return "No results"
+    
     shoe_char_data_str = "product_id,size,color,material,brand,description\n"
     for row in values:
         row_data = []
@@ -169,4 +216,6 @@ if __name__ == "__main__":
     param = 3
     #x = asyncio.run(get_customer_open_deliveries(param))
     #print(x)
-    print(asyncio.run(late_delivery_last60d(param)))
+    #print(asyncio.run(late_delivery_last60d(param)))
+    #print(asyncio.run(get_unique_list('material')))
+    print(asyncio.run(get_shoe_characteristics()))

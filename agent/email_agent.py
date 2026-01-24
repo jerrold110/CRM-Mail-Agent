@@ -15,7 +15,7 @@ import asyncio
 from _state import EmailCharacteristics, EmailAgentState, DeliveryInfo
 
 # Import tools
-from _db_read_tools import get_shoe_characteristics, get_product_availability, get_customer_open_deliveries, get_current_date, is_coupon_redeemed, late_delivery_last60d
+from _db_read_tools import get_unique_list, get_shoe_characteristics, get_query_shoe_characteristics, get_product_availability, get_customer_open_deliveries, get_current_date, is_coupon_redeemed, late_delivery_last60d
 
 # Import agent memory functions
 from _agent_memory_crud import update_customer_support_history, read_customer_support_history, delete_customer_support_history
@@ -55,7 +55,7 @@ async def classify_email(state: EmailAgentState) -> Command[Literal["find_closes
 
     # Format the prompt on-demand, not stored in state
     classification_prompt = f"""
-    Analyze this email and classify it. Use the email conversation history to gain context on this email if necessary
+    Analyze this email from a customer and classify it. Use the email conversation history to gain context on this email if necessary. 
 
     Email: 
     {state.email_content}
@@ -63,27 +63,28 @@ async def classify_email(state: EmailAgentState) -> Command[Literal["find_closes
     Email history summary:
     {conversation_summary_formatted}
         
-    Provide classification including topic, urgency, and provide a summary. 
+    Provide classification including topic, urgency, and provide a summary. If the customer has sent an email with the same meaning than three times in a row email history, classify urgency as urgent.
     """
 
     # Get structured response directly as dict
     classification = await structured_llm.ainvoke(classification_prompt)
 
-    # Determine next node based on classification
+    # Determine next node based on classification    
     if classification.topic == 'product_availability_inquiry':
         goto = "find_closest_product"
     elif classification.topic == 'product_recommendation_request':
         goto = "find_closest_product"
-    elif classification.topic == 'delivery_complaint':
+    elif classification.topic == 'delivery_delay':
         goto = 'find_customer_order'
     else: # Program will exit with error
         goto = "other"
-
+    print(conversation_summary_formatted)
     print("Summary:", classification.summary)
     print("Classification:", classification.topic)
     print("urgency:", classification.urgency)
     print(goto)
-
+    #exit(1)
+    
     # Update memory with summary of customer email
     await update_customer_support_history(
         state.customer_id,
@@ -91,6 +92,14 @@ async def classify_email(state: EmailAgentState) -> Command[Literal["find_closes
         classification.summary,
         conversation_summary,       # None or a dictionary
         True)
+
+    if classification.urgency == 'urgent':
+        return Command(
+            update={"classification": classification,
+                    'actions': [{"Action": "Human_escalation"}]
+                    },
+            goto='send_response_to_backend'
+        )
 
     # Update state data and select the next node (goto)
     return Command(
@@ -103,7 +112,7 @@ async def find_customer_order(state: EmailAgentState) -> Command[Literal["write_
     - Prompt the LLM to extract the tracking_numbers provided by the customer.
     """
     product_match_prompt = f"""
-    Identify the delivery ids or tracking numbers in the client's email. 
+    Identify the  tracking numbers in the client's email. 
     Tracking numbers are a combination of letters and integers such as: UPS987654321, FDX123456789
 
     Client email: 
@@ -112,10 +121,9 @@ async def find_customer_order(state: EmailAgentState) -> Command[Literal["write_
 
     structured_llm = llm.with_structured_output(DeliveryInfo)
     response = await structured_llm.ainvoke(product_match_prompt)
-    print(response)
 
     if len(response.tracking_number) == 0:
-        message = "The customer has not provided a valid tracking number or delivery id in their email. Ask them to respond with valid information."
+        message = "The customer has not provided a valid delivery tracking number in their email. Ask them to respond with valid information."
 
         return Command(
             update = {'context': [message]},
@@ -173,9 +181,9 @@ async def check_deliveries(state: EmailAgentState):
             elif actual_delivery is None:
                 new_context.append(f"Delivery id {delivery_id} and tracking number {tracking_number} shipped on {str(shipped_date)} is late and currently out on delivery refund of the delivery fee for the number of late days will be credited to the customer when delivered.")
                 new_actions.append({"Action": "Track_refund_delivery_fee", "params": {"delivery_id": str(delivery_id)}})
+
             # Create coupon if 
             # - There was a late closed delivery in the last 60 days
-
             if await late_delivery_last60d(state.customer_id) and not await is_coupon_redeemed(state.customer_id, delivery_id):
                 new_context.append(f"Delivery id {delivery_id} and tracking number {tracking_number} is late and there was another late delivery within the last 60 days. A coupon for expedited delivery is created and offered to the customer which can be used on the next order.")
                 new_actions.append({"Action": "Create_coupon", "params": {"delivery_id": str(delivery_id), "customer_id": str(state.customer_id)}})
@@ -187,32 +195,106 @@ async def check_deliveries(state: EmailAgentState):
     return {'context': new_context,
             'actions': new_actions}
 
+async def _text_2_sql(query:str) -> str:
+    """
+    Query always uses the format:
+    SELECT * FROM shoe_characteristics ...
+
+    Make sure to test this robustly
+
+    """
+    text2sql_prompt = f"""
+    You are an expert data analyst.
+
+    Your task is to translate a natural-language question into a single, valid, read-only SQL query.
+
+    Database:
+    - Engine: PostgreSQL
+
+    Rules:
+    - ONLY Filter by the columns listed in the schema using the where clause
+    - Do NOT invent columns or tables.
+    - Always use SELECT *.
+    - Return at most 500 rows.
+    - For string columns, apply the lower() function to both sides
+    - If the question cannot be answered with the schema, return:
+    -- CANNOT_ANSWER
+
+    Schema:
+    Table: shoe_characteristics
+    Columns:
+    - size (Decimal(3,1)): the size of the shoe
+    - color (VARCHAR(50)): the color
+    - material (VARCHAR(50)): the material
+    - weight (DECIMAL(5,2)): the weight in grams
+    - brand (TEXT): brand of the shoe: the brand
+
+    Use these examples as reference:
+
+    Question: I am looking for blue mesh shoes in size 9.
+    Answer: SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'blue'\n  AND lower(material) = 'mesh'\n  AND size = 9.5\nLIMIT 500;
+
+    Question: Can you recommend any white shoes in size 9.5 that are comfortable and stylish?
+    Answer: SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'white'\n AND size = 9.5\nLIMIT 500;
+    """
+
+    response = await llm.ainvoke(
+        [SystemMessage(content=text2sql_prompt)] + [HumanMessage(query)]
+    )
+
+    return response.content
+
 async def find_closest_product(state: EmailAgentState) -> Command[Literal["check_inventory_llm_call"]]:
     """
     CHANGE THIS TO TEXT2SQL because there will be a vast number of rows (this cannot be passed into the model)
+    Extract entities -> sql template -> results -> analyse results
+    - Product name: Do not use
+    - Brand: Use, let llm edit query
+    - Numbers: Extract
 
     Prompt the LLM to determine if there if there are products that matches the description(s) provided by the customer.
 
     """
+    #valid_brands = get_unique_list('brand')
+    #valid_colors = get_unique_list('color')
+    #valid_materials = get_unique_list('material')
+    print('-------------------------------------------------')
+    raise ValueError("An appropriate value was not provided.")
+    
+    sql_query = await _text_2_sql(state.email_content)
+
     # Identify what the product being searched for is by checking product features database
-    # asyncio.run(get_shoe_characteristics()) is wrong for asynchronous programming
-    product_characteristics = await get_shoe_characteristics() 
+    # Check without filters
+    if sql_query == 'CANNOT_ANSWER':
+        product_characteristics = await get_shoe_characteristics()
+    else:
+        product_characteristics = await get_query_shoe_characteristics(sql_query)
 
-    product_match_prompt = f"""
-    Match the products the client is looking for to the closest products we have in our product catalogue which is in csv format. Pay attention to specific requests about size. Tell me what the client is looking for and the ids of the matching products.
+    if product_characteristics == "No results":
+        response = "There are no products in the inventory that match the customer's inquiry."
+        return Command(
+            update={"messages": [AIMessage(content=response)], "context": [response]},    # Adds to messages not replace. We don't want to save the response metadata to the state,
+            goto="write_response"
+        )
+    else:
+        product_match_prompt = f"""
+        Match the products the client is looking for to the closest products we have in our product catalogue which is in csv format. Pay attention to specific requests about size. Tell me what the client is looking for and the ids of the matching products.
 
-    Client email: {state.email_content}
+        Client email: {state.email_content}
 
-    Product catalogue in csv format: 
-    {product_characteristics}
-    """
+        Product catalogue in csv format: 
+        {product_characteristics}
+        """
 
-    response = await llm.ainvoke(product_match_prompt) # AIMessage type
+        response = await llm.ainvoke(product_match_prompt) # AIMessage type
+        response = response.content
 
-    return Command(
-        update={"messages": [AIMessage(content=response.content)]},    # Adds to messages not replace. We are not using [response] because we don't want to save the response metadata to the state
-        goto="check_inventory_llm_call"
-    )
+        print(response)
+
+        return Command(
+            update={"messages": [AIMessage(content=response)]},    # Adds to messages not replace. We don't want to save the response metadata to the state,
+            goto="check_inventory_llm_call"
+        )
 
 async def check_inventory_llm_call(state: EmailAgentState):
     """ 
@@ -288,7 +370,7 @@ async def write_response(state: EmailAgentState) -> Command[Literal["send_respon
         "other": None,
         "product_availability_inquiry": "The customer has asked about the availability of specific products. Tell the customer that these products are available",
         "product_recommendation_request": "The customer has asked for a recommendation based on certain criteria. Tell the customer that these products are the closest match to what they are looking for and their availability",
-        "delivery_complaint": "The customer has complained about a delivery, refer to the context for details and respond. Only mention deliveries by tracking number, do not mention delivery id"
+        "delivery_delay": "The customer has complained about a delivery being delayed, refer to the context for details and respond. Only mention deliveries by tracking number, do not mention delivery id"
     }
 
     if state.context != None:
@@ -314,7 +396,7 @@ async def write_response(state: EmailAgentState) -> Command[Literal["send_respon
     email_response = await llm.ainvoke(draft_prompt)
 
     # Get the summary with 4.1 micro
-    summary_instructions = "You are an expert summarizer that summarizes the content in an email."
+    summary_instructions = "You are an expert summarizer that summarizes the content in an email sent by the Customer Service Team."
     email_response_summary = await summary_llm.ainvoke(
         [
             SystemMessage(content=summary_instructions),
@@ -352,8 +434,12 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.types import RetryPolicy
 workflow = StateGraph(EmailAgentState)
 
+myretrypolicy = RetryPolicy(
+    max_attempts=3, 
+    initial_interval=1.0)
+
 # Add nodes with appropriate error handling
-workflow.add_node("classify_email", classify_email)
+workflow.add_node("classify_email")
 
 workflow.add_node("find_closest_product", find_closest_product)
 workflow.add_node("check_inventory_llm_call", check_inventory_llm_call)
@@ -382,20 +468,19 @@ workflow.add_edge("write_response", "send_response_to_backend")
 workflow.add_edge("send_response_to_backend", END)
 
 # Compile with checkpointer for persistence, in case run graph with Local_Server --> Please compile without checkpointer
-memory = MemorySaver()
+#memory = MemorySaver()
 app = workflow.compile()
 
 async def main():
-    config = {"configurable": {"thread_id": "1"}} # Enables checkpointing for memory, hitl, etc...
-    result = await app.ainvoke(initial_state)
-    print(f"Graph exited")
+    #config = {"configurable": {"thread_id": "1"}} # Enables checkpointing for memory, hitl, etc...
+    await app.ainvoke(initial_state)#, config=config)
 
 if __name__ == '__main__':
 
     product_availability_email = """
         Dear Sir/Madam,
 
-        I would like to inquire the availability of red leather shoes in size 7.0
+        I would like to inquire the availability of red leather shoes that will help me run fast
 
         Regards,
         Michael
@@ -403,7 +488,7 @@ if __name__ == '__main__':
     delivery_delay_email = """
     Dear sir/madam,
 
-    I would like to ask why my delivery tracking number USPS777888999 is late
+    Here it is: UPS321654987
 
     Regards
 
@@ -420,14 +505,16 @@ if __name__ == '__main__':
     initial_state = {
         "customer_name": "Michael",
 
-        "customer_id": 2,
+        "customer_id": 1,
 
-        "case_id": 1234,
+        "case_id": 1,
 
-        "email_content": delivery_delay_email
+        "email_content": product_availability_email
     }
     
+    # Reset memory
+    delete_customer_support_history(1, 1)
+
     asyncio.run(main())
 
-    # Reset memory
-    delete_customer_support_history(2, 1234)
+    
