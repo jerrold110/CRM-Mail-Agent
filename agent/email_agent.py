@@ -258,10 +258,11 @@ async def find_closest_product(state: EmailAgentState) -> Command[Literal["check
     #valid_brands = get_unique_list('brand')
     #valid_colors = get_unique_list('color')
     #valid_materials = get_unique_list('material')
-    print('-------------------------------------------------')
-    raise ValueError("An appropriate value was not provided.")
+    #print('-------------------------------------------------')
+    #raise ValueError("This is a manually throws error.")
     
-    sql_query = await _text_2_sql(state.email_content)
+    #sql_query = await _text_2_sql(state.email_content)
+    sql_query = "bla bla bla"
 
     # Identify what the product being searched for is by checking product features database
     # Check without filters
@@ -288,8 +289,6 @@ async def find_closest_product(state: EmailAgentState) -> Command[Literal["check
 
         response = await llm.ainvoke(product_match_prompt) # AIMessage type
         response = response.content
-
-        print(response)
 
         return Command(
             update={"messages": [AIMessage(content=response)]},    # Adds to messages not replace. We don't want to save the response metadata to the state,
@@ -411,7 +410,7 @@ async def write_response(state: EmailAgentState) -> Command[Literal["send_respon
         goto="send_response_to_backend"
     )
 
-async def send_response_to_backend(state: EmailAgentState):
+async def send_response_to_backend(state: EmailAgentState) -> dict:
     """
     Send the following to the backend:
     - Case ID
@@ -426,29 +425,69 @@ async def send_response_to_backend(state: EmailAgentState):
     print('Context:',state.context)
     print('Actions:', state.actions)
     print(state.email_response_summary)
+    
+    """
+    Send to event queue that writes to backend CRM database
 
-    return {}
+    """
+
+    """
+    Return the following for agent evaluation
+    - Response
+    - Context
+    - Actions
+
+    """
+    output = {
+        'email_response': state.email_response,
+        'actions': state.actions,
+        'context': state.context
+    }
+
+    return output
 
 
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.types import RetryPolicy
+import uuid
+from asyncpg.exceptions import PostgresSyntaxError, PostgresConnectionError, PostgresIOError
+from openai import RateLimitError, APIConnectionError
+
 workflow = StateGraph(EmailAgentState)
 
+# Explicit mention of the error type is required for retrying to work
+# API/tool time outs, network, wrong model output
 myretrypolicy = RetryPolicy(
     max_attempts=3, 
-    initial_interval=1.0)
+    initial_interval=1.0,
+    retry_on=[ValueError])
+
+all_retrypolicy = RetryPolicy(
+    max_attempts=3, 
+    initial_interval=1.0,
+    backoff_factor=2.0,
+    retry_on=[
+        ConnectionRefusedError, 
+        ConnectionError, 
+        PostgresSyntaxError, 
+        PostgresConnectionError, 
+        PostgresIOError,
+        RateLimitError,
+        APIConnectionError
+    ]
+)
 
 # Add nodes with appropriate error handling
-workflow.add_node("classify_email")
+workflow.add_node("classify_email", classify_email)
 
-workflow.add_node("find_closest_product", find_closest_product)
-workflow.add_node("check_inventory_llm_call", check_inventory_llm_call)
-workflow.add_node("check_inventory_tool_node", check_inventory_tool_node)
+workflow.add_node("find_closest_product", find_closest_product, retry_policy=all_retrypolicy)
+workflow.add_node("check_inventory_llm_call", check_inventory_llm_call, retry_policy=all_retrypolicy)
+workflow.add_node("check_inventory_tool_node", check_inventory_tool_node, retry_policy=all_retrypolicy)
 
-workflow.add_node("find_customer_order", find_customer_order)
-workflow.add_node("check_deliveries", check_deliveries)
+workflow.add_node("find_customer_order", find_customer_order, retry_policy=all_retrypolicy)
+workflow.add_node("check_deliveries", check_deliveries, retry_policy=all_retrypolicy)
 
-workflow.add_node("write_response", write_response)
+workflow.add_node("write_response", write_response, retry_policy=all_retrypolicy)
 workflow.add_node("send_response_to_backend", send_response_to_backend)
 
 # Add only the essential edges
@@ -468,53 +507,52 @@ workflow.add_edge("write_response", "send_response_to_backend")
 workflow.add_edge("send_response_to_backend", END)
 
 # Compile with checkpointer for persistence, in case run graph with Local_Server --> Please compile without checkpointer
-#memory = MemorySaver()
-app = workflow.compile()
+memory = MemorySaver()
+app = workflow.compile(checkpointer=memory)
 
-async def main():
-    #config = {"configurable": {"thread_id": "1"}} # Enables checkpointing for memory, hitl, etc...
-    await app.ainvoke(initial_state)#, config=config)
+async def main(initial_state:dict):
+    my_uuid = uuid.uuid4()
 
-if __name__ == '__main__':
+    config = {"configurable": {"thread_id": str(my_uuid)}} # Enables checkpointing for retries, memory, hitl, etc...
+    await app.ainvoke(initial_state, config=config)
 
-    product_availability_email = """
-        Dear Sir/Madam,
+product_availability_email = """
+    Dear Sir/Madam,
 
-        I would like to inquire the availability of red leather shoes that will help me run fast
+    I would like to inquire the availability of red leather shoes that will help me run fast
 
-        Regards,
-        Michael
-    """
-    delivery_delay_email = """
-    Dear sir/madam,
+    Regards,
+    Michael
+"""
+delivery_delay_email = """
+Dear sir/madam,
 
-    Here it is: UPS321654987
+Here it is: UPS321654987
 
-    Regards
+Regards
 
-    """
-    urgent_email = """
-    Dear sir/madam,
+"""
+urgent_email = """
+Dear sir/madam,
 
-    I HAVE A BOMB AND WILL BLOW UP YOUR STORE
+I HAVE A BOMB AND WILL BLOW UP YOUR STORE
 
-    Regards
+Regards
 
-    """
-    # Test the agent
-    initial_state = {
-        "customer_name": "Michael",
+"""
+# Test the agent
+initial_state = {
+    "customer_name": "Michael",
 
-        "customer_id": 1,
+    "customer_id": 1,
 
-        "case_id": 1,
+    "case_id": 1,
 
-        "email_content": product_availability_email
-    }
-    
-    # Reset memory
-    delete_customer_support_history(1, 1)
+    "email_content": product_availability_email
+}
 
-    asyncio.run(main())
+# Reset memory
+delete_customer_support_history(1, 1)
+asyncio.run(main())
 
     
