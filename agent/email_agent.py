@@ -82,8 +82,6 @@ async def classify_email(state: EmailAgentState) -> Command[Literal["find_closes
     print("Summary:", classification.summary)
     print("Classification:", classification.topic)
     print("urgency:", classification.urgency)
-    print(goto)
-    #exit(1)
     
     # Update memory with summary of customer email
     await update_customer_support_history(
@@ -261,8 +259,7 @@ async def find_closest_product(state: EmailAgentState) -> Command[Literal["check
     #print('-------------------------------------------------')
     #raise ValueError("This is a manually throws error.")
     
-    #sql_query = await _text_2_sql(state.email_content)
-    sql_query = "bla bla bla"
+    sql_query = await _text_2_sql(state.email_content)
 
     # Identify what the product being searched for is by checking product features database
     # Check without filters
@@ -395,7 +392,8 @@ async def write_response(state: EmailAgentState) -> Command[Literal["send_respon
     email_response = await llm.ainvoke(draft_prompt)
 
     # Get the summary with 4.1 micro
-    summary_instructions = "You are an expert summarizer that summarizes the content in an email sent by the Customer Service Team."
+    summary_instructions = "You are an expert summarizer that summarizes the content in an email."
+    #"You are an expert summarizer that summarizes the content in an email sent by the Customer Service Team."
     email_response_summary = await summary_llm.ainvoke(
         [
             SystemMessage(content=summary_instructions),
@@ -412,7 +410,7 @@ async def write_response(state: EmailAgentState) -> Command[Literal["send_respon
 
 async def send_response_to_backend(state: EmailAgentState) -> dict:
     """
-    Send the following to the backend:
+    Send to event queue that writes to backend CRM database:
     - Case ID
     - Response
     - Response summary
@@ -421,31 +419,14 @@ async def send_response_to_backend(state: EmailAgentState) -> dict:
     
     """
     
-    print(state.email_response)
-    print('Context:',state.context)
-    print('Actions:', state.actions)
-    print(state.email_response_summary)
+    # print(state.email_response)
+    # print('Context:', state.context)
+    # print('Actions:', state.actions)
+    # print(state.email_response_summary)
+
+    if state.send_backend:
+        print('send backend status:', state.send_backend)
     
-    """
-    Send to event queue that writes to backend CRM database
-
-    """
-
-    """
-    Return the following for agent evaluation
-    - Response
-    - Context
-    - Actions
-
-    """
-    output = {
-        'email_response': state.email_response,
-        'actions': state.actions,
-        'context': state.context
-    }
-
-    return output
-
 
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.types import RetryPolicy
@@ -506,53 +487,79 @@ workflow.add_edge("check_deliveries", "write_response")
 workflow.add_edge("write_response", "send_response_to_backend")
 workflow.add_edge("send_response_to_backend", END)
 
-# Compile with checkpointer for persistence, in case run graph with Local_Server --> Please compile without checkpointer
+# Compile with checkpointer for persistence
 memory = MemorySaver()
 app = workflow.compile(checkpointer=memory)
 
-async def main(initial_state:dict):
-    my_uuid = uuid.uuid4()
+async def invoke_agent(initial_state:dict, job_id:str):
+    """
+    This function starts the agent workflow which orchestrates the agent actions and sending the response to the backend. If state.send_backend is False such as during testing, it will not send a http request to the backend
 
-    config = {"configurable": {"thread_id": str(my_uuid)}} # Enables checkpointing for retries, memory, hitl, etc...
-    await app.ainvoke(initial_state, config=config)
+    thread_id is the same as job_id. This enables retries, and human in the loop
 
-product_availability_email = """
-    Dear Sir/Madam,
+    Langgraph is designed to return the entire state (streaming, branching, retries, HITL...)
+    """
+    
+    config = {"configurable": 
+                {"thread_id": str(job_id)}
+             } 
 
-    I would like to inquire the availability of red leather shoes that will help me run fast
+    graph_state = await app.ainvoke(initial_state, config=config) # this is a dictionary
 
-    Regards,
-    Michael
-"""
-delivery_delay_email = """
-Dear sir/madam,
+    eval_output = {
+        'email_response': graph_state['email_response'],
+        'context': graph_state['context'],
+        'actions': graph_state['actions']
+    }
 
-Here it is: UPS321654987
+    return eval_output
 
-Regards
 
-"""
-urgent_email = """
-Dear sir/madam,
+# ======= Test the agent ==========
+if __name__ == '__main__':
+    product_availability_email = """
+        Dear Sir/Madam,
 
-I HAVE A BOMB AND WILL BLOW UP YOUR STORE
+        I would like to inquire the availability of red leather shoes that will help me run fast
 
-Regards
+        Regards,
+        Michael
+    """
+    delivery_delay_email = """
+        Dear sir/madam,
 
-"""
-# Test the agent
-initial_state = {
-    "customer_name": "Michael",
+        Why is my order delayer, tracking number UPS321654987
 
-    "customer_id": 1,
+        Regards
 
-    "case_id": 1,
+        """
+    urgent_email = """
+        Dear sir/madam,
 
-    "email_content": product_availability_email
-}
+        I HAVE A BOMB AND WILL BLOW UP YOUR STORE
 
-# Reset memory
-delete_customer_support_history(1, 1)
-asyncio.run(main())
+        Regards
+
+        """
+
+    initial_state = {
+        'send_backend': False,
+        "customer_name": "Michael",
+        "customer_id": 1,
+        "case_id": 1,
+        "email_content": delivery_delay_email
+    }
+
+    delete_customer_support_history(1, 1)
+    job_id = uuid.uuid4()
+    eval_output = asyncio.run(invoke_agent(initial_state, job_id))
+
+    print('==========================================')
+    print(eval_output)
+    print('==========================================')
+
+    # Reset memory
+    delete_customer_support_history(1, 1)
+
 
     

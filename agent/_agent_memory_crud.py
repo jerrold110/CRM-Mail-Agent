@@ -60,6 +60,7 @@ def delete_customer_support_history(
         case_id:int
     ):
     """
+    Used to clear memory after testing
     """
     namespace = ("email_conversation_history", str(customer_id))
     key = str(case_id)

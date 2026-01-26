@@ -13,6 +13,9 @@ class DeliveryInfo(BaseModel):
     tracking_number: list[str] = Field(default_factory=list)
 
 class EmailAgentState(BaseModel):
+    # Test status
+    send_backend: bool = Field(default=True)
+
     # Email data 
     customer_name: str
     customer_id: int
@@ -29,8 +32,8 @@ class EmailAgentState(BaseModel):
     messages: Annotated[list[AnyMessage], operator.add] = Field(default_factory=list)
 
     # Email response
-    email_response: str = ""
-    email_response_summary: str  = ""
+    email_response: str = Field(default="")
+    email_response_summary: str = Field(default="")
     # Context gathered from system. Will be included in source reflected to user.
     context: Annotated[list[str], operator.add] = Field(default_factory=list)
     # Actions to be taken after human review
