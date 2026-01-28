@@ -5,7 +5,7 @@ from langchain.messages import AnyMessage
 
 # Define the state
 class EmailCharacteristics(BaseModel):
-    topic: Literal["transaction_inquiry", "product_availability_inquiry", "product_recommendation_request", "delivery_delay", "billing_dispute", "other"]
+    topic: Literal["transaction_inquiry", "product_availability_or_recommendation", "delivery_delay", "billing_dispute", "other"]
     urgency: Literal["low", "medium", "high", "urgent"]
     summary: str
 
@@ -23,8 +23,9 @@ class EmailAgentState(BaseModel):
     email_content: str 
     email_summary_history: str | None = None # Used when Email history provides context; such as when answering a request for more information to process action
 
-    # Email characteristics
-    classification: EmailCharacteristics | None = None 
+    # Email characteristics. Add more fields as use-cases increase
+    classification: EmailCharacteristics | None = None
+    closest_product_sql_query: str = Field(default="")
     delivery: DeliveryInfo | None = None 
 
     # LLM messages. Follow up actions should be more deterministic after the initial observation steps by the agent. These actions use specific state fields for follow-up actions

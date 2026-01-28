@@ -43,7 +43,7 @@ https://docs.langchain.com/oss/python/langgraph/use-graph-api#async
 """
 
 # Nodes
-def classify_email(state: EmailAgentState) -> Command[Literal["find_closest_product", "find_customer_order"]]:
+def classify_email(state: EmailAgentState) -> Command[Literal["get_comprehensive_product_query", "find_customer_order"]]:
     """
     Use LLM to classify email topic and urgency, then route accordingly. 
 
@@ -68,21 +68,19 @@ def classify_email(state: EmailAgentState) -> Command[Literal["find_closest_prod
     Email history summary:
     {conversation_summary_formatted}
         
-    Provide classification including topic, urgency, and provide a summary. If the customer has sent an email with the same meaning that occurs more than three times in the email history, classify urgency as urgent.
+    Provide classification including topic, urgency, and provide a summary. If the customer has sent an email with the same meaning that occurs more than three times in the email history, classify urgency as urgent. If there are multiple request types in the email classify topic as 'other'.
     """
 
     # Get structured response directly as dict
     classification = structured_llm.invoke(classification_prompt)
 
     # Determine next node based on classification    
-    if classification.topic == 'product_availability_inquiry':
-        goto = "find_closest_product"
-    elif classification.topic == 'product_recommendation_request':
-        goto = "find_closest_product"
+    if classification.topic == 'product_availability_or_recommendation':
+        goto = "get_comprehensive_product_query"
     elif classification.topic == 'delivery_delay':
         goto = 'find_customer_order'
     else:
-        print('email could not be classified')
+        print('email could not be classified and is routed to human escalation')
         goto = "other"
     print(conversation_summary_formatted)
     print("Summary:", classification.summary)
@@ -111,7 +109,7 @@ def classify_email(state: EmailAgentState) -> Command[Literal["find_closest_prod
         goto=goto
     )
 
-def find_customer_order(state: EmailAgentState) -> Command[Literal["write_response", "check_inventory_llm_call"]]:
+def find_customer_order(state: EmailAgentState) -> Command[Literal["write_response", "check_deliveries"]]:
     """
     - Prompt the LLM to extract the tracking_numbers provided by the customer.
     """
@@ -201,18 +199,24 @@ def check_deliveries(state: EmailAgentState):
     return {'context': new_context,
             'actions': new_actions}
 
-def _text_2_sql(query:str) -> str:
+def get_comprehensive_product_query(state: EmailAgentState) -> str:
     """
     Query always uses the format:
     SELECT * FROM shoe_characteristics ...
 
-    Make sure to test this robustly
+    This is necessary because the LLM is not able to intelligently understand tabular data on numerical columns (such as size), it is however able to understand textual data (such as descriptions).
+    Hence the process is
+
+    Query -> SQL query -> Tabular output -> filter by specific thing the customer is asking for
 
     """
+
+    query = state.email_content
+
     text2sql_prompt = f"""
     You are an expert data analyst.
 
-    Your task is to translate a natural-language question into a single, valid, read-only SQL query.
+    Your task is to translate a natural-language question into a single, valid, read-only SQL query. If there are multiple shoes mentioned use inclusive logic and not use exclusive logic to return everything in the query.
 
     Database:
     - Engine: PostgreSQL
@@ -223,22 +227,20 @@ def _text_2_sql(query:str) -> str:
     - Always use SELECT *.
     - Return at most 500 rows.
     - For string columns, apply the lower() function to both sides
-    - If the question cannot be answered with the schema, return:
-    -- CANNOT_ANSWER
+    - If the question cannot be answered with the schema, return: CANNOT_ANSWER
 
     Schema:
     Table: shoe_characteristics
     Columns:
     - size (Decimal(3,1)): the size of the shoe
     - color (VARCHAR(50)): the color
-    - material (VARCHAR(50)): the material
     - weight (DECIMAL(5,2)): the weight in grams
     - brand (TEXT): brand of the shoe: the brand
 
     Use these examples as reference:
 
     Question: I am looking for blue mesh shoes in size 9.
-    Answer: SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'blue'\n  AND lower(material) = 'mesh'\n  AND size = 9.5\nLIMIT 500;
+    Answer: SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'blue'\n AND size = 9\nLIMIT 500;
 
     Question: Can you recommend any white shoes in size 9.5 that are comfortable and stylish?
     Answer: SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'white'\n AND size = 9.5\nLIMIT 500;
@@ -248,12 +250,11 @@ def _text_2_sql(query:str) -> str:
         [SystemMessage(content=text2sql_prompt)] + [HumanMessage(query)]
     )
 
-    return response.content
+    return {'closest_product_sql_query': response.content}
 
-def find_closest_product(state: EmailAgentState) -> Command[Literal["check_inventory_llm_call"]]:
+def match_closest_product(state: EmailAgentState) -> Command[Literal["check_inventory_llm_call"]]:
     """
-    CHANGE THIS TO TEXT2SQL because there will be a vast number of rows (this cannot be passed into the model)
-    Extract entities -> sql template -> results -> analyse results
+    Email -> sql template -> results -> analyse results
     - Product name: Do not use
     - Brand: Use, let llm edit query
     - Numbers: Extract
@@ -267,10 +268,9 @@ def find_closest_product(state: EmailAgentState) -> Command[Literal["check_inven
     #print('-------------------------------------------------')
     #raise ValueError("This is a manually throws error.")
     
-    sql_query = _text_2_sql(state.email_content)
+    sql_query = state.closest_product_sql_query
 
-    # Identify what the product being searched for is by checking product features database
-    # Check without filters
+    # Check without filters. THIS IS A BAD OPTION BUT ALLOWS GRACEFUL HANDLING
     if sql_query == 'CANNOT_ANSWER':
         product_characteristics = asyncio.run(get_shoe_characteristics())
     else:
@@ -337,7 +337,6 @@ def conditional_edge_check_inventory(state: EmailAgentState) -> Literal["check_i
 
     messages = state.messages
     last_message = messages[-1]
-    
 
     if last_message.tool_calls:
         return "check_inventory_tool_node"
@@ -372,8 +371,7 @@ def write_response(state: EmailAgentState) -> Command[Literal["send_response_to_
 
     email_objective = {
         "other": None,
-        "product_availability_inquiry": "The customer has asked about the availability of specific products. Tell the customer that these products are available",
-        "product_recommendation_request": "The customer has asked for a recommendation based on certain criteria. Tell the customer that these products are the closest match to what they are looking for and their availability",
+        "product_availability_or_recommendation": "The customer has asked for a recommendation based on certain criteria or availability of certian shoes. Tell the customer that these products are the closest match to what they are looking for and their availability",
         "delivery_delay": "The customer has complained about a delivery being delayed, refer to the context for details and respond. Only mention deliveries by tracking number, do not mention delivery id"
     }
 
@@ -464,7 +462,8 @@ all_retrypolicy = RetryPolicy(
 # Add nodes with appropriate error handling
 workflow.add_node("classify_email", classify_email)
 
-workflow.add_node("find_closest_product", find_closest_product, retry_policy=all_retrypolicy)
+workflow.add_node("get_comprehensive_product_query", get_comprehensive_product_query, retry_policy=all_retrypolicy)
+workflow.add_node("match_closest_product", match_closest_product, retry_policy=all_retrypolicy)
 workflow.add_node("check_inventory_llm_call", check_inventory_llm_call, retry_policy=all_retrypolicy)
 workflow.add_node("check_inventory_tool_node", check_inventory_tool_node, retry_policy=all_retrypolicy)
 
@@ -477,7 +476,8 @@ workflow.add_node("send_response_to_backend", send_response_to_backend)
 # Add only the essential edges
 workflow.add_edge(START, "classify_email")
 
-workflow.add_edge("find_closest_product", "check_inventory_llm_call")
+workflow.add_edge("get_comprehensive_product_query", "match_closest_product")
+workflow.add_edge("match_closest_product", "check_inventory_llm_call")
 workflow.add_conditional_edges(
     "check_inventory_llm_call",
     conditional_edge_check_inventory,

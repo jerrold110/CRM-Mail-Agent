@@ -117,17 +117,19 @@ urgent_email = """
 product_availability_email_puma = """
     Dear Sir/Madam,
 
-    I would like to inquire the availability of Puma running shoes
+    I would like to inquire the availability of Puma running shoes.
+
+    Can you also recommend a pair of blue basketball shoes.
 
     Regards,
     Michael
     """
 
-#delete_customer_support_history(1, 1)
+delete_customer_support_history(4000, 4000)
 
 job_id = uuid.uuid4()
 
-num = 406
+num = 4000
 
 eval_output = invoke_agent(num, "Michael", num, product_availability_email_puma, job_id)
 
