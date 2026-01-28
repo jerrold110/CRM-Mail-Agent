@@ -69,7 +69,6 @@ add_customer_support_history(
     history
 )
 
-
 history = {
     '0': "Customer is inquiring about a delayed delivery.",
     '1': "The Customer Service Team requests Michael to provide his valid tracking number so they can locate his delayed delivery and assist him more effectively."

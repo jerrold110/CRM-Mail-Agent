@@ -1,6 +1,5 @@
 from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.store.postgres import PostgresStore
-import asyncio
 
 DB_URI = "postgresql://admin:admin@localhost:5432/agent_memory?sslmode=disable"
 """
@@ -8,7 +7,7 @@ https://reference.langchain.com/python/langgraph/store/#langgraph.store.postgres
 
 """
 
-async def update_customer_support_history(
+def update_customer_support_history(
         customer_id:int, 
         case_id:int, 
         message:str, 
@@ -32,13 +31,13 @@ async def update_customer_support_history(
     ):
         if not message_history:
             message_history = {'0': memory_value}
-            await store.aput(namespace, key, message_history)
+            store.put(namespace, key, message_history)
         else:
             message_history[str(len(message_history))] = memory_value
-            await store.aput(namespace, key, message_history)
+            store.put(namespace, key, message_history)
 
 
-async def read_customer_support_history(customer_id: int, case_id:int) -> dict | None:
+def read_customer_support_history(customer_id: int, case_id:int) -> dict | None:
     """
     Do not block the event loop as this function is executed at scale 
     """
@@ -50,7 +49,7 @@ async def read_customer_support_history(customer_id: int, case_id:int) -> dict |
         PostgresSaver.from_conn_string(DB_URI) as checkpointer,
     ):
         
-        result = await store.aget(namespace=namespace, key=key)
+        result = store.get(namespace=namespace, key=key)
         if result:
             return result.value # exctract the data as a dictionary
         return None
@@ -78,7 +77,6 @@ if __name__ == "__main__":
     cust = '404'
     case = '404'
 
-
-    # delete_customer_support_history(cust, case)
-    x = asyncio.run(read_customer_support_history(404, 404))
+    delete_customer_support_history(cust, case)
+    x = read_customer_support_history(404, 404)
     print(x)

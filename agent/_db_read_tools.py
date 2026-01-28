@@ -80,7 +80,14 @@ class ProuctIdInput(BaseModel):
     productId: int
 
 @tool(args_schema=ProuctIdInput)
-async def get_product_availability(productId: int) -> str:
+def get_product_availability(productId: int) -> str:
+    """
+    Sync wrapper for async function that uses asyncpg
+    """
+
+    return asyncio.run(a_get_product_availability(productId))
+
+async def a_get_product_availability(productId: int) -> str:
     """
     Get the inventory of a product from the database by id. If there are no stocks of the product or its quantity is 0, check the incoming deliveries
 

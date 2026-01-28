@@ -36,17 +36,22 @@ llm_check_inventory_with_tools = ChatOpenAI(
     model="gpt-4.1-mini",
     temperature=0.5).bind_tools(tools)
 
+"""
+This needs to be changed. Async should only be used if there are multiple concurrent calls within the agent, celery handles asynchronous execution so agent should be synchronous
+https://docs.langchain.com/oss/python/langgraph/use-graph-api#async
+
+"""
+
 # Nodes
-async def classify_email(state: EmailAgentState) -> Command[Literal["find_closest_product", "find_customer_order"]]:
+def classify_email(state: EmailAgentState) -> Command[Literal["find_closest_product", "find_customer_order"]]:
     """
     Use LLM to classify email topic and urgency, then route accordingly. 
 
     Reads from memory to classify correctly and updates memory.
     """
-
     structured_llm = llm.with_structured_output(EmailCharacteristics)
     
-    conversation_summary = await read_customer_support_history(state.customer_id, state.case_id) # Dict or none
+    conversation_summary = read_customer_support_history(state.customer_id, state.case_id) # Dict or none
 
     if not conversation_summary:
         conversation_summary_formatted = "No history available"
@@ -63,11 +68,11 @@ async def classify_email(state: EmailAgentState) -> Command[Literal["find_closes
     Email history summary:
     {conversation_summary_formatted}
         
-    Provide classification including topic, urgency, and provide a summary. If the customer has sent an email with the same meaning than three times in a row email history, classify urgency as urgent.
+    Provide classification including topic, urgency, and provide a summary. If the customer has sent an email with the same meaning that occurs more than three times in the email history, classify urgency as urgent.
     """
 
     # Get structured response directly as dict
-    classification = await structured_llm.ainvoke(classification_prompt)
+    classification = structured_llm.invoke(classification_prompt)
 
     # Determine next node based on classification    
     if classification.topic == 'product_availability_inquiry':
@@ -76,7 +81,8 @@ async def classify_email(state: EmailAgentState) -> Command[Literal["find_closes
         goto = "find_closest_product"
     elif classification.topic == 'delivery_delay':
         goto = 'find_customer_order'
-    else: # Program will exit with error
+    else:
+        print('email could not be classified')
         goto = "other"
     print(conversation_summary_formatted)
     print("Summary:", classification.summary)
@@ -84,14 +90,14 @@ async def classify_email(state: EmailAgentState) -> Command[Literal["find_closes
     print("urgency:", classification.urgency)
     
     # Update memory with summary of customer email
-    await update_customer_support_history(
+    update_customer_support_history(
         state.customer_id,
         state.case_id,
         classification.summary,
         conversation_summary,       # None or a dictionary
         True)
 
-    if classification.urgency == 'urgent':
+    if classification.urgency == 'urgent' or goto == 'other':
         return Command(
             update={"classification": classification,
                     'actions': [{"Action": "Human_escalation"}]
@@ -105,7 +111,7 @@ async def classify_email(state: EmailAgentState) -> Command[Literal["find_closes
         goto=goto
     )
 
-async def find_customer_order(state: EmailAgentState) -> Command[Literal["write_response", "check_inventory_llm_call"]]:
+def find_customer_order(state: EmailAgentState) -> Command[Literal["write_response", "check_inventory_llm_call"]]:
     """
     - Prompt the LLM to extract the tracking_numbers provided by the customer.
     """
@@ -118,7 +124,7 @@ async def find_customer_order(state: EmailAgentState) -> Command[Literal["write_
     """
 
     structured_llm = llm.with_structured_output(DeliveryInfo)
-    response = await structured_llm.ainvoke(product_match_prompt)
+    response = structured_llm.invoke(product_match_prompt)
 
     if len(response.tracking_number) == 0:
         message = "The customer has not provided a valid delivery tracking number in their email. Ask them to respond with valid information."
@@ -133,14 +139,14 @@ async def find_customer_order(state: EmailAgentState) -> Command[Literal["write_
         goto="check_deliveries"
     )
 
-async def check_deliveries(state: EmailAgentState):
+def check_deliveries(state: EmailAgentState):
     """
     - Check if there are any open deliveries
     - If there are, check for matches
     - If there are matches, check for deliveries that 
     """
 
-    open_deliveries = await get_customer_open_deliveries(state.customer_id)
+    open_deliveries = asyncio.run(get_customer_open_deliveries(state.customer_id))
     # Match open_deliveries with information extracted from email
     matches = []
     for d in open_deliveries:
@@ -157,7 +163,7 @@ async def check_deliveries(state: EmailAgentState):
             goto = "write_response"
         )
 
-    present_date = await get_current_date()
+    present_date = asyncio.run(get_current_date())
     # Credit refunds and coupons
     new_context = []
     new_actions = []
@@ -182,7 +188,9 @@ async def check_deliveries(state: EmailAgentState):
 
             # Create coupon if 
             # - There was a late closed delivery in the last 60 days
-            if await late_delivery_last60d(state.customer_id) and not await is_coupon_redeemed(state.customer_id, delivery_id):
+            ldl = asyncio.run(late_delivery_last60d(state.customer_id))
+            icr = asyncio.run(is_coupon_redeemed(state.customer_id, delivery_id))
+            if ldl and not icr:
                 new_context.append(f"Delivery id {delivery_id} and tracking number {tracking_number} is late and there was another late delivery within the last 60 days. A coupon for expedited delivery is created and offered to the customer which can be used on the next order.")
                 new_actions.append({"Action": "Create_coupon", "params": {"delivery_id": str(delivery_id), "customer_id": str(state.customer_id)}})
         # item is not late and an open dlivery
@@ -193,7 +201,7 @@ async def check_deliveries(state: EmailAgentState):
     return {'context': new_context,
             'actions': new_actions}
 
-async def _text_2_sql(query:str) -> str:
+def _text_2_sql(query:str) -> str:
     """
     Query always uses the format:
     SELECT * FROM shoe_characteristics ...
@@ -236,13 +244,13 @@ async def _text_2_sql(query:str) -> str:
     Answer: SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'white'\n AND size = 9.5\nLIMIT 500;
     """
 
-    response = await llm.ainvoke(
+    response = llm.invoke(
         [SystemMessage(content=text2sql_prompt)] + [HumanMessage(query)]
     )
 
     return response.content
 
-async def find_closest_product(state: EmailAgentState) -> Command[Literal["check_inventory_llm_call"]]:
+def find_closest_product(state: EmailAgentState) -> Command[Literal["check_inventory_llm_call"]]:
     """
     CHANGE THIS TO TEXT2SQL because there will be a vast number of rows (this cannot be passed into the model)
     Extract entities -> sql template -> results -> analyse results
@@ -259,14 +267,14 @@ async def find_closest_product(state: EmailAgentState) -> Command[Literal["check
     #print('-------------------------------------------------')
     #raise ValueError("This is a manually throws error.")
     
-    sql_query = await _text_2_sql(state.email_content)
+    sql_query = _text_2_sql(state.email_content)
 
     # Identify what the product being searched for is by checking product features database
     # Check without filters
     if sql_query == 'CANNOT_ANSWER':
-        product_characteristics = await get_shoe_characteristics()
+        product_characteristics = asyncio.run(get_shoe_characteristics())
     else:
-        product_characteristics = await get_query_shoe_characteristics(sql_query)
+        product_characteristics = asyncio.run(get_query_shoe_characteristics(sql_query))
 
     if product_characteristics == "No results":
         response = "There are no products in the inventory that match the customer's inquiry."
@@ -284,7 +292,7 @@ async def find_closest_product(state: EmailAgentState) -> Command[Literal["check
         {product_characteristics}
         """
 
-        response = await llm.ainvoke(product_match_prompt) # AIMessage type
+        response = llm.invoke(product_match_prompt) # AIMessage type
         response = response.content
 
         return Command(
@@ -292,7 +300,7 @@ async def find_closest_product(state: EmailAgentState) -> Command[Literal["check
             goto="check_inventory_llm_call"
         )
 
-async def check_inventory_llm_call(state: EmailAgentState):
+def check_inventory_llm_call(state: EmailAgentState):
     """ 
     LLM decides what tool calls to make. The tool call decisions are made here.
     This function will either declare that tools need to be called, or declare that no more tool calls need to be made and progress to the next node.
@@ -316,7 +324,7 @@ async def check_inventory_llm_call(state: EmailAgentState):
     
     It will append a new message that summarizes the findings and has no more tool call instructions
     """
-    response = await llm_check_inventory_with_tools.ainvoke(
+    response = llm_check_inventory_with_tools.invoke(
         [SystemMessage(content=agent_message)] + state.messages
     )
     
@@ -336,7 +344,7 @@ def conditional_edge_check_inventory(state: EmailAgentState) -> Literal["check_i
     
     return "write_response"
     
-async def check_inventory_tool_node(state: EmailAgentState):
+def check_inventory_tool_node(state: EmailAgentState):
     """
     This node performs the tool calls for get_inventory_stock and get_incoming_deliveries
     """
@@ -347,7 +355,7 @@ async def check_inventory_tool_node(state: EmailAgentState):
 
     for tool_call in tool_call_message:
         tool = tools_by_name[tool_call["name"]]
-        observation = await tool.ainvoke(tool_call["args"])
+        observation = tool.invoke(tool_call["args"])
 
         message_result.append(ToolMessage(content=observation, tool_call_id=tool_call["id"]))
         context_result.append(observation)
@@ -355,7 +363,7 @@ async def check_inventory_tool_node(state: EmailAgentState):
     return {"messages": message_result,
             "context": context_result}
 
-async def write_response(state: EmailAgentState) -> Command[Literal["send_response_to_backend"]]:
+def write_response(state: EmailAgentState) -> Command[Literal["send_response_to_backend"]]:
     """
     Write email to the customer that achieves the objective and responds to the customer email
     """
@@ -389,12 +397,12 @@ async def write_response(state: EmailAgentState) -> Command[Literal["send_respon
     - Sign off the email as Customer Service Team
     """
 
-    email_response = await llm.ainvoke(draft_prompt)
+    email_response = llm.invoke(draft_prompt)
 
     # Get the summary with 4.1 micro
     summary_instructions = "You are an expert summarizer that summarizes the content in an email."
     #"You are an expert summarizer that summarizes the content in an email sent by the Customer Service Team."
-    email_response_summary = await summary_llm.ainvoke(
+    email_response_summary = summary_llm.invoke(
         [
             SystemMessage(content=summary_instructions),
             HumanMessage(content=email_response.content)
@@ -408,7 +416,7 @@ async def write_response(state: EmailAgentState) -> Command[Literal["send_respon
         goto="send_response_to_backend"
     )
 
-async def send_response_to_backend(state: EmailAgentState) -> dict:
+def send_response_to_backend(state: EmailAgentState) -> dict:
     """
     Send to event queue that writes to backend CRM database:
     - Case ID
@@ -419,29 +427,23 @@ async def send_response_to_backend(state: EmailAgentState) -> dict:
     
     """
     
-    # print(state.email_response)
-    # print('Context:', state.context)
-    # print('Actions:', state.actions)
-    # print(state.email_response_summary)
-
+    print(state.email_response)
+    print('Context:', state.context)
+    print('Actions:', state.actions)
+    print(state.email_response_summary)
     if state.send_backend:
         print('send backend status:', state.send_backend)
-    
 
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.types import RetryPolicy
 import uuid
 from asyncpg.exceptions import PostgresSyntaxError, PostgresConnectionError, PostgresIOError
-from openai import RateLimitError, APIConnectionError
+from openai import RateLimitError, APIConnectionError, BadRequestError
 
 workflow = StateGraph(EmailAgentState)
 
 # Explicit mention of the error type is required for retrying to work
 # API/tool time outs, network, wrong model output
-myretrypolicy = RetryPolicy(
-    max_attempts=3, 
-    initial_interval=1.0,
-    retry_on=[ValueError])
 
 all_retrypolicy = RetryPolicy(
     max_attempts=3, 
@@ -454,7 +456,8 @@ all_retrypolicy = RetryPolicy(
         PostgresConnectionError, 
         PostgresIOError,
         RateLimitError,
-        APIConnectionError
+        APIConnectionError,
+        BadRequestError
     ]
 )
 
@@ -491,7 +494,7 @@ workflow.add_edge("send_response_to_backend", END)
 memory = MemorySaver()
 app = workflow.compile(checkpointer=memory)
 
-async def invoke_agent(initial_state:dict, job_id:str):
+def invoke_agent(initial_state:dict, job_id:str):
     """
     This function starts the agent workflow which orchestrates the agent actions and sending the response to the backend. If state.send_backend is False such as during testing, it will not send a http request to the backend
 
@@ -502,12 +505,12 @@ async def invoke_agent(initial_state:dict, job_id:str):
     
     config = {"configurable": 
                 {"thread_id": str(job_id)}
-             } 
+             }
 
-    graph_state = await app.ainvoke(initial_state, config=config) # this is a dictionary
+    graph_state = app.invoke(initial_state, config=config) # this returns a dictionary
 
     eval_output = {
-        'email_response': graph_state['email_response'],
+        'email_response': graph_state.get('email_response', ''), # this is buggy, unsure why
         'context': graph_state['context'],
         'actions': graph_state['actions']
     }
@@ -516,50 +519,6 @@ async def invoke_agent(initial_state:dict, job_id:str):
 
 
 # ======= Test the agent ==========
-if __name__ == '__main__':
-    product_availability_email = """
-        Dear Sir/Madam,
-
-        I would like to inquire the availability of red leather shoes that will help me run fast
-
-        Regards,
-        Michael
-    """
-    delivery_delay_email = """
-        Dear sir/madam,
-
-        Why is my order delayer, tracking number UPS321654987
-
-        Regards
-
-        """
-    urgent_email = """
-        Dear sir/madam,
-
-        I HAVE A BOMB AND WILL BLOW UP YOUR STORE
-
-        Regards
-
-        """
-
-    initial_state = {
-        'send_backend': False,
-        "customer_name": "Michael",
-        "customer_id": 1,
-        "case_id": 1,
-        "email_content": delivery_delay_email
-    }
-
-    delete_customer_support_history(1, 1)
-    job_id = uuid.uuid4()
-    eval_output = asyncio.run(invoke_agent(initial_state, job_id))
-
-    print('==========================================')
-    print(eval_output)
-    print('==========================================')
-
-    # Reset memory
-    delete_customer_support_history(1, 1)
 
 
     
