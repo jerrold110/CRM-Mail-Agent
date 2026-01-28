@@ -17,3 +17,6 @@ A Multi-agent system that handles customer support emails
 
 ### Agent diagram
 ![System diagram](images/agentGraph.png "Optional title")
+
+### Python frameworks
+![System diagram](images/pythonLibraries.png "Optional title")
