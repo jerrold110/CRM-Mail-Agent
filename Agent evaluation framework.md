@@ -7,13 +7,13 @@ Construct evaluation set that defines input state and expected outcome. LLM muta
 
 Write functions to read from a structured evaluation set to test tools/planning/evaluation that output metric scores
 
-Per each evaluation, load accompanying data, run test, finally remove data: 
-- Internal SQL database
-- Agent memory in PostGres
+
+Load all rows into internal database (Postgres). Instead of loading rows per evaluation which would cause evaluation to be unwieldy
+Per each evaluation, load accompanying agent memory, run test, remove memory: 
 
 # What to evaluate
 **Tool evaluation**
-- Email classifier with memory
+- classify_email with memory
     - Classification
     - Urgency
 - get_comprehensive_product_query
@@ -36,7 +36,7 @@ Per each evaluation, load accompanying data, run test, finally remove data:
     - generates an email response based on context, email_classification, and email
 
 # Evaluation metrics for each system
-## Email classifier
+## classify_email
 This is a structured llm invocation.
 
 Classification

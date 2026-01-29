@@ -13,7 +13,6 @@ files_read = config.read(config_file_path)
 if not files_read:
     raise FileNotFoundError(f"Error: {config_file_path} not found or could not be read.")
 else:
-    print(f"Successfully read {config_file_path}")
 
     # Access values by section and key
     db_host = config['database']['host'] # or localhost
@@ -28,8 +27,28 @@ DB_URI = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_memory_d
 """
 https://reference.langchain.com/python/langgraph/store/#langgraph.store.postgres.PostgresStore
 
+In this memory storage:
+namespace : (email_conversation_history, {customer_id})
+key: {case_id}
 """
 
+def read_customer_support_history(customer_id: int, case_id:int) -> dict | None:
+    """
+    Do not block the event loop as this function is executed at scale 
+    """
+    namespace = ("email_conversation_history", str(customer_id))
+    key = str(case_id)
+
+    with (
+        PostgresStore.from_conn_string(DB_URI) as store,  
+        PostgresSaver.from_conn_string(DB_URI) as checkpointer,
+    ):
+        
+        result = store.get(namespace=namespace, key=key)
+        if result:
+            return result.value # exctract the data as a dictionary
+        return None
+    
 def update_customer_support_history(
         customer_id:int, 
         case_id:int, 
@@ -58,24 +77,6 @@ def update_customer_support_history(
         else:
             message_history[str(len(message_history))] = memory_value
             store.put(namespace, key, message_history)
-
-
-def read_customer_support_history(customer_id: int, case_id:int) -> dict | None:
-    """
-    Do not block the event loop as this function is executed at scale 
-    """
-    namespace = ("email_conversation_history", str(customer_id))
-    key = str(case_id)
-
-    with (
-        PostgresStore.from_conn_string(DB_URI) as store,  
-        PostgresSaver.from_conn_string(DB_URI) as checkpointer,
-    ):
-        
-        result = store.get(namespace=namespace, key=key)
-        if result:
-            return result.value # exctract the data as a dictionary
-        return None
     
 def delete_customer_support_history(
         customer_id:int, 

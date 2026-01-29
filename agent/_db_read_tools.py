@@ -18,8 +18,6 @@ files_read = config.read(config_file_path)
 if not files_read:
     raise FileNotFoundError(f"Error: {config_file_path} not found or could not be read.")
 else:
-    print(f"Successfully read {config_file_path}")
-
     # Access values by section and key
     db_host = config['database']['host']
     db_user = config['database']['user']

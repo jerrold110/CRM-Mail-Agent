@@ -1,0 +1,14 @@
+[
+{
+    "input_state":{
+        "customer_id": 1,
+        "customer_name": "Alvin Atkinson",
+        "email_content": "Dear sir,\n\n I want to find out why my delivery is delayed, tracking number UPS321654987\n\nRegards,\nAlvin Atkinson",
+        "case_memory": null
+    },
+    "expected":{
+        "topic": "delivery_delay",
+        "urgency": false
+    }
+}
+]

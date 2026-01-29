@@ -82,10 +82,10 @@ def classify_email(state: EmailAgentState) -> Command[Literal["get_comprehensive
     else:
         print('email could not be classified and is routed to human escalation')
         goto = "other"
-    print(conversation_summary_formatted)
-    print("Summary:", classification.summary)
-    print("Classification:", classification.topic)
-    print("urgency:", classification.urgency)
+    # print(conversation_summary_formatted)
+    # print("Summary:", classification.summary)
+    # print("Classification:", classification.topic)
+    # print("urgency:", classification.urgency)
     
     # Update memory with summary of customer email
     update_customer_support_history(
