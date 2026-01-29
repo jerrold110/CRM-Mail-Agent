@@ -1,7 +1,30 @@
 from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.store.postgres import PostgresStore
 
-DB_URI = "postgresql://admin:admin@localhost:5432/agent_memory?sslmode=disable"
+
+# ===================== Code to load configuration variables =====================
+import configparser
+from pathlib import Path
+
+config = configparser.ConfigParser()
+config_file_path = Path(__file__).resolve().parent / "config.cfg"
+
+files_read = config.read(config_file_path)
+if not files_read:
+    raise FileNotFoundError(f"Error: {config_file_path} not found or could not be read.")
+else:
+    print(f"Successfully read {config_file_path}")
+
+    # Access values by section and key
+    db_host = config['database']['host'] # or localhost
+    db_user = config['database']['user']
+    db_password = config['database']['password']
+    db_memory_database = config['database']['memory_database']
+    db_port = config['database']['port']
+# ===================== Code to load configuration variables =====================
+
+DB_URI = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_memory_database}?sslmode=disable"
+
 """
 https://reference.langchain.com/python/langgraph/store/#langgraph.store.postgres.PostgresStore
 

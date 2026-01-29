@@ -1,7 +1,13 @@
-# CRM-Mail-Agent
-A Multi-agent system that handles customer support emails 
+# **CRM-Mail-Agent**
+A straightforward agent system that handles customer support emails where system complexity is reduced to facilitate operational stability.
+- Fully integrated memory system with context compression that can respond to emails in context while reducing token cost
 
-### System diagram
+- Answer product inquiries, recommend products, check stocks and incoming deliveries
+- Respond to late delivery complaints, check delivery histories, credit fee refunds, provide coupons for retention
+- HITL for all actions and responses, agent runs asynchronously in real-time
+- Data authorisation at the app level so no breach of data when responding to client
+
+## System diagram
 ![System diagram](images/overallSystem.png "Optional title")
 
 1. Customer sends email to Customer Support
@@ -12,11 +18,11 @@ A Multi-agent system that handles customer support emails
 6. Staff reviews email draft, approves email
 7. CRM sends AI prepared email response to client
 
-### Agent Process
+## Agent memory system
 ![System diagram](images/agentProcess.png "Optional title")
 
-### Agent diagram
+## Agent diagram
 ![System diagram](images/agentGraph.png "Optional title")
 
-### Python frameworks
+## Python frameworks
 ![System diagram](images/pythonLibraries.png "Optional title")

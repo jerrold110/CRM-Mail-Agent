@@ -2,14 +2,35 @@ import asyncio
 import asyncpg # Supposedly better performance than psycopg, does not block the thread 
 
 from pydantic import BaseModel, Field
-from typing import Literal
 
 from langchain.tools import tool
 from datetime import datetime, date
 
+
+# ===================== Code to load configuration variables =====================
+import configparser
+from pathlib import Path
+
+config = configparser.ConfigParser()
+config_file_path = Path(__file__).resolve().parent / "config.cfg"
+
+files_read = config.read(config_file_path)
+if not files_read:
+    raise FileNotFoundError(f"Error: {config_file_path} not found or could not be read.")
+else:
+    print(f"Successfully read {config_file_path}")
+
+    # Access values by section and key
+    db_host = config['database']['host']
+    db_user = config['database']['user']
+    db_password = config['database']['password']
+    db_database = config['database']['database']
+# ===================== Code to load configuration variables =====================
+
+
 async def get_unique_list(f: str):
-    conn = await asyncpg.connect(user='admin', password='admin',
-                                database='company', host='127.0.0.1')
+    conn = await asyncpg.connect(user=db_user, password=db_password,
+                                database=db_database, host=db_host)
     
     query = f"""
     SELECT DISTINCT({f}) AS field 
@@ -28,8 +49,8 @@ async def get_unique_list(f: str):
 
 # These two functions can be optimised further to reduce token usage
 async def get_shoe_characteristics():
-    conn = await asyncpg.connect(user='admin', password='admin',
-                                database='company', host='127.0.0.1')
+    conn = await asyncpg.connect(user=db_user, password=db_password,
+                                database=db_database, host=db_host)
     values = await conn.fetch(
         'SELECT * FROM shoe_characteristics'
     )
@@ -51,8 +72,8 @@ async def get_shoe_characteristics():
     return shoe_char_data_str
 
 async def get_query_shoe_characteristics(sql_query: str):
-    conn = await asyncpg.connect(user='admin', password='admin',
-                                database='company', host='127.0.0.1')
+    conn = await asyncpg.connect(user=db_user, password=db_password,
+                                database=db_database, host=db_host)
     values = await conn.fetch(
         sql_query
     )
@@ -94,8 +115,8 @@ async def a_get_product_availability(productId: int) -> str:
     Args:
         productId: Product Id
     """
-    conn = await asyncpg.connect(user='admin', password='admin',
-                                database='company', host='127.0.0.1')
+    conn = await asyncpg.connect(user=db_user, password=db_password,
+                                database=db_database, host=db_host)
     inventory_values = await conn.fetch(
         f"""
         SELECT a.product_id, a.product_name, a.size, b.quantity
@@ -147,8 +168,8 @@ async def get_customer_open_deliveries(customer_id: int) -> list[tuple]:
     
     """
     assert isinstance(customer_id, int)
-    conn = await asyncpg.connect(user='admin', password='admin',
-                                database='company', host='127.0.0.1')
+    conn = await asyncpg.connect(user=db_user, password=db_password,
+                                database=db_database, host=db_host)
     values = await conn.fetch(
         f"""
         SELECT
@@ -178,8 +199,8 @@ async def is_coupon_redeemed(customer_id, delivery_id):
     Determine if the coupon has been created for a late delivery,
     if yes it would have been created in the database
     """
-    conn = await asyncpg.connect(user='admin', password='admin',
-                                database='company', host='127.0.0.1')
+    conn = await asyncpg.connect(user=db_user, password=db_password,
+                                database=db_database, host=db_host)
     values = await conn.fetch(
         f"""
         SELECT
@@ -198,8 +219,8 @@ async def late_delivery_last60d(customer_id):
     """
     Current day is 2024-01-20
     """
-    conn = await asyncpg.connect(user='admin', password='admin',
-                                database='company', host='127.0.0.1')
+    conn = await asyncpg.connect(user=db_user, password=db_password,
+                                database=db_database, host=db_host)
     values = await conn.fetch(
         f"""
         SELECT
