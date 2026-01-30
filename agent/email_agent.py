@@ -68,7 +68,7 @@ def classify_email(state: EmailAgentState) -> Command[Literal["get_comprehensive
     Email history summary:
     {conversation_summary_formatted}
         
-    Provide classification including topic, urgency, and provide a summary. If the customer has sent an email with the same meaning that occurs more than three times in the email history, classify urgency as urgent. If there are multiple request types in the email classify topic as 'other'.
+    Provide classification including topic, urgency, and provide a summary. Each email must be closely related to the topic classification, if there are multiple request types in the email or you are unsure classify topic as 'other'. If the customer has sent an email with the same meaning that occurs more than three times in the email history, classify urgency as urgent. 
     """
 
     # Get structured response directly as dict
@@ -82,10 +82,10 @@ def classify_email(state: EmailAgentState) -> Command[Literal["get_comprehensive
     else:
         print('email could not be classified and is routed to human escalation')
         goto = "other"
-    # print(conversation_summary_formatted)
-    # print("Summary:", classification.summary)
-    # print("Classification:", classification.topic)
-    # print("urgency:", classification.urgency)
+    print(conversation_summary_formatted)
+    print("Summary:", classification.summary)
+    print("Classification:", classification.topic)
+    print("urgency:", classification.urgency)
     
     # Update memory with summary of customer email
     update_customer_support_history(
