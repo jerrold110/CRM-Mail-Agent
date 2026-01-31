@@ -19,7 +19,7 @@ A fullstack agent system for an athletic footwear Ecommerce business that respon
 7. CRM sends AI prepared email response to client
 
 ## Agent memory system
-![System diagram](images/agentMemory.png "Optional title")
+![System diagram](images/memory.png "Optional title")
 
 This diagram shows how the agent's memory is updated and accessed at each stage of the email conversation between Customer service and the Customer. The memory stores summaries of emails so as to reduce LLM token input and save cost when memory is used.
 
