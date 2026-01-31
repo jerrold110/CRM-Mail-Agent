@@ -1,5 +1,6 @@
 [
 {
+    "test_no": 1,
     "input_state":{
         "customer_id": 1,
         "customer_name": "Alvin Atkinson",
@@ -8,7 +9,142 @@
     },
     "expected":{
         "topic": "delivery_delay",
-        "urgency": false
+        "urgency": "not_urgent"
+    }
+},
+{
+    "test_no": 2,
+    "input_state":{
+        "customer_id": 1,
+        "customer_name": "Michael",
+        "email_content": "Dear Sir/Madam,\n\nI would like to inquire the availability of red leather shoes that will help me run fast\n\nRegards,\nMichael",
+        "case_memory": null
+    },
+    "expected":{
+        "topic": "product_availability_or_recommendation",
+        "urgency": "not_urgent"
+    }
+},
+{
+    "test_no": 3,
+    "input_state":{
+        "customer_id": 1,
+        "customer_name": "Mick",
+        "email_content": "Dear Sir/Madam,\n\nWe urgently need to place an order of Addidas football shoes because our team is competing in the state finals next weekend. We request an immediate response.\n\nRegards,\nMichael",
+        "case_memory": null
+    },
+    "expected":{
+        "topic": "product_availability_or_recommendation",
+        "urgency": "urgent"
+    }
+},
+{
+    "test_no": 4,
+    "input_state":{
+        "customer_id": 1,
+        "customer_name": "Michael",
+        "email_content": "Dear Sir/Madam,\n\nI would like to inquire the availability of red leather shoes that will help me run fast\n\nRegards,\nMichael",
+        "case_memory": {
+        "0": "Customer inquires about the availability of red leather shoes designed to help with running fast.",
+        "1": "The customer service team responded to Michael's inquiry, confirming that they have 100 pairs of red leather Nike Air Max shoes in size 10.0 and 100 in size 9.5 in stock. They offered assistance with ordering or providing additional information."
+        }
+    },
+    "expected":{
+        "topic": "product_availability_or_recommendation",
+        "urgency": "not_urgent"
+    }
+},
+{
+    "test_no": 5,
+    "input_state":{
+        "customer_id": 1,
+        "customer_name": "Michael",
+        "email_content": "Dear Sir/Madam,\n\nI would like to inquire the availability of red leather shoes that will help me run fast\n\nRegards,\nMichael",
+        "case_memory": {
+        "0": "Customer inquires about the availability of red leather shoes designed to help with running fast.",
+        "1": "The customer service team responded to Michael's inquiry, confirming that they have 100 pairs of red leather Nike Air Max shoes in size 10.0 and 100 in size 9.5 in stock. They offered assistance with ordering or providing additional information.",
+        "2": "The client, Michael, is looking for red leather shoes that will help him run fast.",
+        "3": "The email confirms the availability of red leather Nike Air Max shoes in sizes 9.5 and 10.0, with 100 units of each size in stock. It highlights the shoes' comfort and support and offers further assistance or to place an order."
+        }
+    },
+    "expected":{
+        "topic": "product_availability_or_recommendation",
+        "urgency": "not_urgent"
+    }
+},
+{
+    "test_no": 6,
+    "input_state":{
+        "customer_id": 1,
+        "customer_name": "Michael",
+        "email_content": "Dear Sir/Madam,\n\nI would like to inquire the availability of red leather shoes that will help me run fast\n\nRegards,\nMichael",
+        "case_memory": {
+        "0": "Customer inquires about the availability of red leather shoes designed to help with running fast.",
+        "1": "The customer service team responded to Michael's inquiry, confirming that they have 100 pairs of red leather Nike Air Max shoes in size 10.0 and 100 in size 9.5 in stock. They offered assistance with ordering or providing additional information.",
+        "2": "The client, Michael, is looking for red leather shoes that will help him run fast.",
+        "3": "The email confirms the availability of red leather Nike Air Max shoes in sizes 9.5 and 10.0, with 100 units of each size in stock. It highlights the shoes' comfort and support and offers further assistance or to place an order.",
+        "4": "The client, Michael, is looking for red leather shoes that will help him run fast.",
+        "5": "The Customer Service Team responded to Michael's inquiry by confirming the availability of red leather Nike Air Max running shoes. They have 100 units in size 10.0 and 100 units in size 9.5 in stock and offered to provide additional assistance if needed."
+        }
+    },
+    "expected":{
+        "topic": "product_availability_or_recommendation",
+        "urgency": "urgent"
+    }
+},
+{
+    "test_no": 7,
+    "input_state":{
+        "customer_id": 1,
+        "customer_name": "Mick",
+        "email_content": "Dear Sir/Madam,\n\nI would like to check the status of my transaction number ABC123456789 because it has not been refunded yet even though 3 business days have passed\n\nRegards,\nMick",
+        "case_memory": null
+    },
+    "expected":{
+        "topic": "transaction_inquiry",
+        "urgency": "not_urgent"
+    }
+},
+{
+    "test_no": 8,
+    "input_state":{
+        "customer_id": 1,
+        "customer_name": "Jim",
+        "email_content": "tracking number UPS321654987",
+        "case_memory": {
+        "0": "Customer is inquiring about a delayed delivery.",
+        "1": "The Customer Service Team requests Michael to provide his valid tracking number so they can locate his delayed delivery and assist him more effectively."
+    }
+    },
+    "expected":{
+        "topic": "delivery_delay",
+        "urgency": "not_urgent"
+    }
+},
+{
+    "test_no": 9,
+    "input_state":{
+        "customer_id": 1,
+        "customer_name": "Mick",
+        "email_content": "Dear Sir/Madam,\n\nWhat time does your store close on saturday evening?\n\nRegards,",
+        "case_memory": null
+    },
+    "expected":{
+        "topic": "other",
+        "urgency": "not_urgent"
+    }
+},
+{
+    "test_no": 10,
+    "input_state":{
+        "customer_id": 1,
+        "customer_name": "Mick",
+        "email_content": "Dear sir/madam,\nI ordered a shipment of PUMA shoes, the shoes have a manufacturing defect that caused the death of one of our employees. Please contact us immediately\nRegards",
+        "case_memory": null
+    },
+    "expected":{
+        "topic": "other",
+        "urgency": "urgent"
     }
 }
 ]

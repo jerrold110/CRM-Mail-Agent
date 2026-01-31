@@ -1,0 +1,1358 @@
+[
+  {
+    "test_no": 11,
+    "input_state": {
+      "customer_id": 101,
+      "customer_name": "Sarah Jenkins",
+      "email_content": "Hi there,\n\nI'm looking for a pair of trail runners that can handle wet rocks. Do you have anything with GORE-TEX?\n\nBest,\nSarah",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 12,
+    "input_state": {
+      "customer_id": 102,
+      "customer_name": "Davide Rossi",
+      "email_content": "Hello,\n\nMy order hasn't arrived. The tracking is UPS998877665.\n\nThanks,\nDavide",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "delivery_delay",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 13,
+    "input_state": {
+      "customer_id": 103,
+      "customer_name": "Emily Blunt",
+      "email_content": "To whom it may concern,\n\nI am requesting a refund for transaction #TXN55443322. It was a duplicate charge.\n\nRegards,\nEmily",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "transaction_inquiry",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 14,
+    "input_state": {
+      "customer_id": 104,
+      "customer_name": "Gary Oldman",
+      "email_content": "Hey,\n\nWhere is my stuff? It's been weeks.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 15,
+    "input_state": {
+      "customer_id": 104,
+      "customer_name": "Gary Oldman",
+      "email_content": "Here is the number you asked for: FEDEX11223344.",
+      "case_memory": {
+        "0": "Customer complained about a missing package but provided no details.",
+        "1": "Agent requested the tracking number to locate the shipment."
+      }
+    },
+    "expected": {
+      "topic": "delivery_delay",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 16,
+    "input_state": {
+      "customer_id": 105,
+      "customer_name": "Marcus Aurelius",
+      "email_content": "URGENT: I need to cancel order #999 immediately before it ships! My son used my card without permission.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "urgent"
+    }
+  },
+  {
+    "test_no": 17,
+    "input_state": {
+      "customer_id": 106,
+      "customer_name": "Cleo P",
+      "email_content": "Hi,\n\nDo you stock size 15 basketball shoes? I'm having a hard time finding any.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 18,
+    "input_state": {
+      "customer_id": 107,
+      "customer_name": "Tony S",
+      "email_content": "Yo,\n\nI need to know why my refund for TXN_9988_REF isn't showing up. This is ridiculous.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "transaction_inquiry",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 19,
+    "input_state": {
+      "customer_id": 108,
+      "customer_name": "Karen M",
+      "email_content": "This is the third time I am asking. Where is the refund for transaction ID #555-666-777?",
+      "case_memory": {
+        "0": "Customer asked for refund status on #555-666-777.",
+        "1": "Agent said it would take 3 days.",
+        "2": "Customer asked again where the refund for #555-666-777 was.",
+        "3": "Agent said please wait another 24 hours.",
+        "4": "Customer asked for the refund status for #555-666-777 again.",
+        "5": "Agent apologized for the delay."
+      }
+    },
+    "expected": {
+      "topic": "transaction_inquiry",
+      "urgency": "urgent"
+    }
+  },
+  {
+    "test_no": 20,
+    "input_state": {
+      "customer_id": 109,
+      "customer_name": "Steve B",
+      "email_content": "Hello,\n\nI want to buy the red Nikes but also check on my delivery UPS12345. Can you help with both?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 21,
+    "input_state": {
+      "customer_id": 110,
+      "customer_name": "Alice Cooper",
+      "email_content": "Do you guys sell tennis rackets?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 22,
+    "input_state": {
+      "customer_id": 111,
+      "customer_name": "Bob Dylan",
+      "email_content": "Help! The shoes I bought (Order #555) exploded while I was running and I cut my foot. There is blood everywhere.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "urgent"
+    }
+  },
+  {
+    "test_no": 23,
+    "input_state": {
+      "customer_id": 112,
+      "customer_name": "Charlie Watts",
+      "email_content": "Tracking # DHL_5566778899. Why is it stuck in customs?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "delivery_delay",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 24,
+    "input_state": {
+      "customer_id": 113,
+      "customer_name": "David Bowie",
+      "email_content": "Is there any way to expedite shipping on my next order?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 25,
+    "input_state": {
+      "customer_id": 114,
+      "customer_name": "Elton John",
+      "email_content": "I'm looking for high-tops with gold sequins. Size 9.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 26,
+    "input_state": {
+      "customer_id": 115,
+      "customer_name": "Freddie M",
+      "email_content": "TXN_ABC_123. Status?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "transaction_inquiry",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 27,
+    "input_state": {
+      "customer_id": 116,
+      "customer_name": "George H",
+      "email_content": "My shipment is late.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 28,
+    "input_state": {
+      "customer_id": 116,
+      "customer_name": "George H",
+      "email_content": "Sorry, forgot to include it. It's UPS999999.",
+      "case_memory": {
+        "0": "Customer complained that shipment is late.",
+        "1": "Agent asked for the tracking number."
+      }
+    },
+    "expected": {
+      "topic": "delivery_delay",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 29,
+    "input_state": {
+      "customer_id": 117,
+      "customer_name": "Herman Li",
+      "email_content": "I am flying out tomorrow for a marathon and the shoes aren't here! Tracking # FEDEX_URGENT_1. I need an update NOW!",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "delivery_delay",
+      "urgency": "urgent"
+    }
+  },
+  {
+    "test_no": 30,
+    "input_state": {
+      "customer_id": 118,
+      "customer_name": "Iggy Pop",
+      "email_content": "I want to return these, they don't fit.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 31,
+    "input_state": {
+      "customer_id": 119,
+      "customer_name": "Jack White",
+      "email_content": "Do you have any vegan leather soccer cleats?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 32,
+    "input_state": {
+      "customer_id": 120,
+      "customer_name": "Keith R",
+      "email_content": "Are you guys open on Christmas?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 33,
+    "input_state": {
+      "customer_id": 121,
+      "customer_name": "Liam G",
+      "email_content": "Check transaction T-909090 please.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "transaction_inquiry",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 34,
+    "input_state": {
+      "customer_id": 122,
+      "customer_name": "Mick J",
+      "email_content": "You guys dropped the ball on this one. Tracking USPS555444.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "delivery_delay",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 35,
+    "input_state": {
+      "customer_id": 123,
+      "customer_name": "Noel G",
+      "email_content": "I'm in a bit of a pickle. I ordered the wrong size for my nephew's birthday this weekend. Can I swap order #555 ASAP?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "urgent"
+    }
+  },
+  {
+    "test_no": 36,
+    "input_state": {
+      "customer_id": 124,
+      "customer_name": "Ozzy O",
+      "email_content": "I've been ghosted by your support team regarding transaction #TXN666.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "transaction_inquiry",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 37,
+    "input_state": {
+      "customer_id": 125,
+      "customer_name": "Prince",
+      "email_content": "I need purple rain boots. Do you have any?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 38,
+    "input_state": {
+      "customer_id": 126,
+      "customer_name": "Quincy J",
+      "email_content": "What is the status of my refund?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 39,
+    "input_state": {
+      "customer_id": 126,
+      "customer_name": "Quincy J",
+      "email_content": "My bad, here is the ID: REF_123_456.",
+      "case_memory": {
+        "0": "Customer asked about refund status without ID.",
+        "1": "Agent requested transaction ID."
+      }
+    },
+    "expected": {
+      "topic": "transaction_inquiry",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 40,
+    "input_state": {
+      "customer_id": 127,
+      "customer_name": "Ringo S",
+      "email_content": "I need help with a transaction.",
+      "case_memory": {
+        "0": "Customer asked about a transaction.",
+        "1": "Agent asked for the number.",
+        "2": "Customer asked about the transaction again.",
+        "3": "Agent asked for the number again.",
+        "4": "Customer asked about the transaction again.",
+        "5": "Agent asked for the number again."
+      }
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "urgent"
+    }
+  },
+  {
+    "test_no": 41,
+    "input_state": {
+      "customer_id": 128,
+      "customer_name": "Slash",
+      "email_content": "Hey, do you guys have those retro Jordans in stock?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 42,
+    "input_state": {
+      "customer_id": 129,
+      "customer_name": "Tom Petty",
+      "email_content": "I'm free falling waiting for this package. UPS888888.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "delivery_delay",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 43,
+    "input_state": {
+      "customer_id": 130,
+      "customer_name": "Usher",
+      "email_content": "Yeah man, I need those kicks in size 10.",
+      "case_memory": {
+        "0": "Customer asked if they have the new Yeezys.",
+        "1": "Agent confirmed availability and asked for size."
+      }
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 44,
+    "input_state": {
+      "customer_id": 131,
+      "customer_name": "Van Halen",
+      "email_content": "This is an emergency! My team needs 20 pairs of cleats by Friday or we forfeit. Do you have bulk stock?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "urgent"
+    }
+  },
+  {
+    "test_no": 45,
+    "input_state": {
+      "customer_id": 132,
+      "customer_name": "Whitney H",
+      "email_content": "I will always love your store, but where is my order? No tracking number, sorry.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 46,
+    "input_state": {
+      "customer_id": 133,
+      "customer_name": "Xzibit",
+      "email_content": "Yo dawg, I heard you like shoes. Do you have any custom paints?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 47,
+    "input_state": {
+      "customer_id": 134,
+      "customer_name": "Yoko O",
+      "email_content": "Transaction #999-111. Why was I charged twice?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "transaction_inquiry",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 48,
+    "input_state": {
+      "customer_id": 135,
+      "customer_name": "Zack de la Rocha",
+      "email_content": "Rally round the family, we need hiking boots. 4 pairs.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 49,
+    "input_state": {
+      "customer_id": 136,
+      "customer_name": "Adele",
+      "email_content": "Hello,\n\nI need to change my shipping address for order #123. Also, do you sell socks?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 50,
+    "input_state": {
+      "customer_id": 137,
+      "customer_name": "Bjork",
+      "email_content": "The tracking says delivered but it's not here. UPS_GHOST_111.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "delivery_delay",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 51,
+    "input_state": {
+      "customer_id": 138,
+      "customer_name": "Cher",
+      "email_content": "Do you believe in life after love? Also, do you have these in blue?",
+      "case_memory": {
+        "0": "Customer sent a photo of red pumps.",
+        "1": "Agent identified the shoe model."
+      }
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 52,
+    "input_state": {
+      "customer_id": 139,
+      "customer_name": "Drake",
+      "email_content": "Started from the bottom now we here. Looking for top tier running shoes.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 53,
+    "input_state": {
+      "customer_id": 140,
+      "customer_name": "Eminem",
+      "email_content": "I need these shoes for a show tonight! It's critical! Tracking # USPS_MOM_SPAGHETTI.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "delivery_delay",
+      "urgency": "urgent"
+    }
+  },
+  {
+    "test_no": 54,
+    "input_state": {
+      "customer_id": 141,
+      "customer_name": "Frank Sinatra",
+      "email_content": "Fly me to the moon, or just tell me where my refund is. ID: TXN_NY_NY.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "transaction_inquiry",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 55,
+    "input_state": {
+      "customer_id": 142,
+      "customer_name": "Gwen Stefani",
+      "email_content": "This delay is bananas. B-A-N-A-N-A-S. Tracking: DHL_HOLLABACK.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "delivery_delay",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 56,
+    "input_state": {
+      "customer_id": 143,
+      "customer_name": "Harry Styles",
+      "email_content": "Watermelon sugar high! Looking for bright pink loafers.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 57,
+    "input_state": {
+      "customer_id": 144,
+      "customer_name": "Ice Cube",
+      "email_content": "It was a good day, until I saw my bank statement. Double charge on TXN_CUBE.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "transaction_inquiry",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 58,
+    "input_state": {
+      "customer_id": 145,
+      "customer_name": "Jay Z",
+      "email_content": "I got 99 problems but shoes ain't one. Just kidding, I need a refund on order #99.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 59,
+    "input_state": {
+      "customer_id": 146,
+      "customer_name": "Kanye",
+      "email_content": "I'mma let you finish, but I need to know if you have the Yeezy slides.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 60,
+    "input_state": {
+      "customer_id": 147,
+      "customer_name": "Lady Gaga",
+      "email_content": "I'm on the edge of glory... and a nervous breakdown. Where is my package???",
+      "case_memory": {
+        "0": "Customer asked about delayed package.",
+        "1": "Agent asked for tracking number.",
+        "2": "Customer asked again where package is.",
+        "3": "Agent asked for tracking number.",
+        "4": "Customer screamed where is the package.",
+        "5": "Agent asked for tracking number."
+      }
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "urgent"
+    }
+  },
+  {
+    "test_no": 61,
+    "input_state": {
+      "customer_id": 148,
+      "customer_name": "Madonna",
+      "email_content": "FEDEX_VOGUE_123. Tell me where it is.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "delivery_delay",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 62,
+    "input_state": {
+      "customer_id": 149,
+      "customer_name": "Neil Young",
+      "email_content": "Keep on rockin' in the free world. Do you ship to Canada?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 63,
+    "input_state": {
+      "customer_id": 150,
+      "customer_name": "Oprah",
+      "email_content": "You get a refund! I get a refund! actually, just me. TXN_OPRAH.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "transaction_inquiry",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 64,
+    "input_state": {
+      "customer_id": 151,
+      "customer_name": "Pink",
+      "email_content": "So what? I'm still a rock star. I want those combat boots.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 65,
+    "input_state": {
+      "customer_id": 152,
+      "customer_name": "Queen Latifah",
+      "email_content": "Unity. And comfort. Looking for walking shoes for bad knees.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 66,
+    "input_state": {
+      "customer_id": 153,
+      "customer_name": "Rihanna",
+      "email_content": "Where have you been? All my life? Also where is my tracking info for order #RI-RI?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 67,
+    "input_state": {
+      "customer_id": 154,
+      "customer_name": "Snoop Dogg",
+      "email_content": "Drop it like it's hot. The price I mean. Do you have discounts?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 68,
+    "input_state": {
+      "customer_id": 155,
+      "customer_name": "Tina Turner",
+      "email_content": "Simply the best... is what I expected. This transaction #TXN_TINA is an error.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "transaction_inquiry",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 69,
+    "input_state": {
+      "customer_id": 156,
+      "customer_name": "U2 Bono",
+      "email_content": "I still haven't found what I'm looking for. High arch support insoles?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 70,
+    "input_state": {
+      "customer_id": 157,
+      "customer_name": "Vivaldi",
+      "email_content": "Four Seasons... I need shoes for all of them. A waterproof all-rounder?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 71,
+    "input_state": {
+      "customer_id": 158,
+      "customer_name": "Will Smith",
+      "email_content": "Gettin' jiggy with it. But my shoes didn't arrive. Tracking UPS_FRESH_PRINCE.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "delivery_delay",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 72,
+    "input_state": {
+      "customer_id": 159,
+      "customer_name": "Xena",
+      "email_content": "I need boots for battle. Or hiking. Size 8.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 73,
+    "input_state": {
+      "customer_id": 160,
+      "customer_name": "Yanni",
+      "email_content": "Live at the Acropolis. I need shoes for marble floors. Non-slip?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 74,
+    "input_state": {
+      "customer_id": 161,
+      "customer_name": "Zendaya",
+      "email_content": "This is euphoria... or it would be if my return was processed. TXN_ZEN.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "transaction_inquiry",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 75,
+    "input_state": {
+      "customer_id": 162,
+      "customer_name": "Axl Rose",
+      "email_content": "Welcome to the jungle. I'm lost without my order. No tracking number though.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 76,
+    "input_state": {
+      "customer_id": 163,
+      "customer_name": "Billie Eilish",
+      "email_content": "I'm the bad guy. Duff guy. Seriously, do you have skater shoes?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 77,
+    "input_state": {
+      "customer_id": 164,
+      "customer_name": "Celine Dion",
+      "email_content": "My heart will go on... waiting for this refund. TXN_TITANIC.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "transaction_inquiry",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 78,
+    "input_state": {
+      "customer_id": 165,
+      "customer_name": "Dr Dre",
+      "email_content": "Forgot about Dre? I ordered 2 weeks ago! Tracking: UPS_DRE_DAY.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "delivery_delay",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 79,
+    "input_state": {
+      "customer_id": 166,
+      "customer_name": "Elvis",
+      "email_content": "A little less conversation, a little more action please. Where is my stuff?",
+      "case_memory": {
+        "0": "Customer asked for delivery status.",
+        "1": "Agent asked for tracking.",
+        "2": "Customer asked for delivery status.",
+        "3": "Agent asked for tracking.",
+        "4": "Customer asked for delivery status.",
+        "5": "Agent asked for tracking."
+      }
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "urgent"
+    }
+  },
+  {
+    "test_no": 80,
+    "input_state": {
+      "customer_id": 167,
+      "customer_name": "Fergie",
+      "email_content": "Big girls don't cry... they just ask for availability of size 6 pumps.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 81,
+    "input_state": {
+      "customer_id": 168,
+      "customer_name": "Gene Simmons",
+      "email_content": "I want to rock and roll all nite. In platform boots. Do you sell them?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 82,
+    "input_state": {
+      "customer_id": 169,
+      "customer_name": "Hulk Hogan",
+      "email_content": "Whatcha gonna do brother, when this defective shoe rips apart? I need a replacement!",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 83,
+    "input_state": {
+      "customer_id": 170,
+      "customer_name": "Iron Maiden",
+      "email_content": "Run to the hills! These running shoes are great. Can I buy 10 more pairs?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 84,
+    "input_state": {
+      "customer_id": 171,
+      "customer_name": "Janis Joplin",
+      "email_content": "Oh Lord, won't you buy me a Mercedes Benz? Or just refund my transaction TXN_JANIS.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "transaction_inquiry",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 85,
+    "input_state": {
+      "customer_id": 172,
+      "customer_name": "Kiss",
+      "email_content": "Detroit Rock City! Shipment is stuck in Detroit. UPS_KISS.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "delivery_delay",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 86,
+    "input_state": {
+      "customer_id": 173,
+      "customer_name": "Ludacris",
+      "email_content": "Move b***h, get out the way. I need my order NOW. It's an emergency for the concert.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "urgent"
+    }
+  },
+  {
+    "test_no": 87,
+    "input_state": {
+      "customer_id": 174,
+      "customer_name": "Meat Loaf",
+      "email_content": "I would do anything for love, but I won't do that. I won't pay for shipping. Refund TXN_LOAF.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "transaction_inquiry",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 88,
+    "input_state": {
+      "customer_id": 175,
+      "customer_name": "Nirvana",
+      "email_content": "Smells like teen spirit. And rubber. Do you have canvas sneakers?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 89,
+    "input_state": {
+      "customer_id": 176,
+      "customer_name": "Outkast",
+      "email_content": "Hey Ya! Shake it like a polaroid picture. Transaction #TXN_HEY_YA is double charged.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "transaction_inquiry",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 90,
+    "input_state": {
+      "customer_id": 177,
+      "customer_name": "Pearl Jam",
+      "email_content": "Even flow... thoughts arrive like butterflies. My package hasn't arrived. Tracking UPS_PJ.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "delivery_delay",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 91,
+    "input_state": {
+      "customer_id": 178,
+      "customer_name": "Queen",
+      "email_content": "I want to break free. From these tight shoes. Do you have wide fit?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 92,
+    "input_state": {
+      "customer_id": 179,
+      "customer_name": "Radiohead",
+      "email_content": "Karma Police, arrest this man. He stole my shoes. Order #123.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 93,
+    "input_state": {
+      "customer_id": 180,
+      "customer_name": "Sia",
+      "email_content": "I'm gonna swing from the chandelier. I need good grip shoes.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 94,
+    "input_state": {
+      "customer_id": 181,
+      "customer_name": "Tupac",
+      "email_content": "California Love. But I'm in NY. Why was my package sent to CA? Tracking DHL_PAC.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "delivery_delay",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 95,
+    "input_state": {
+      "customer_id": 182,
+      "customer_name": "U2",
+      "email_content": "Where the streets have no name. Delivery driver is lost. Tracking FEDEX_U2.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "delivery_delay",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 96,
+    "input_state": {
+      "customer_id": 183,
+      "customer_name": "Van Morrison",
+      "email_content": "Brown eyed girl. Looking for brown leather boots.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 97,
+    "input_state": {
+      "customer_id": 184,
+      "customer_name": "Weezer",
+      "email_content": "Say it ain't so. My order is cancelled? Why? #555.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 98,
+    "input_state": {
+      "customer_id": 185,
+      "customer_name": "X-Men",
+      "email_content": "Professor X needs a refund. TXN_CEREBRO.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "transaction_inquiry",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 99,
+    "input_state": {
+      "customer_id": 186,
+      "customer_name": "ZZ Top",
+      "email_content": "Sharp dressed man. Need formal shoes. Black.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 100,
+    "input_state": {
+      "customer_id": 187,
+      "customer_name": "Grandpa Joe",
+      "email_content": "I've got a golden ticket! Wait, no, I have a tracking number: UPS_WONKA. Where is it?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "delivery_delay",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 101,
+    "input_state": {
+      "customer_id": 188,
+      "customer_name": "Angry Dan",
+      "email_content": "This is the fourth time I am asking about my refund for transaction #12345. Answer me!",
+      "case_memory": {
+        "0": "Customer asked about refund #12345.",
+        "1": "Agent replied.",
+        "2": "Customer asked about refund #12345.",
+        "3": "Agent replied.",
+        "4": "Customer asked about refund #12345.",
+        "5": "Agent replied."
+      }
+    },
+    "expected": {
+      "topic": "transaction_inquiry",
+      "urgency": "urgent"
+    }
+  },
+  {
+    "test_no": 102,
+    "input_state": {
+      "customer_id": 189,
+      "customer_name": "Confused Carl",
+      "email_content": "I want to buy shoes but I also need a refund for the last pair. Can you help?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 103,
+    "input_state": {
+      "customer_id": 190,
+      "customer_name": "Disaster Dave",
+      "email_content": "The shoelaces strangled my cat! This is a lawsuit waiting to happen. Contact me immediately.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "urgent"
+    }
+  },
+  {
+    "test_no": 104,
+    "input_state": {
+      "customer_id": 191,
+      "customer_name": "Vague Vance",
+      "email_content": "UPS987654321.",
+      "case_memory": {
+        "0": "Customer said they have not received their package.",
+        "1": "Agent asked for tracking number."
+      }
+    },
+    "expected": {
+      "topic": "delivery_delay",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 105,
+    "input_state": {
+      "customer_id": 192,
+      "customer_name": "Specific Steve",
+      "email_content": "TXN_777888999.",
+      "case_memory": {
+        "0": "Customer asked why their card was charged twice.",
+        "1": "Agent asked for the transaction ID."
+      }
+    },
+    "expected": {
+      "topic": "transaction_inquiry",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 106,
+    "input_state": {
+      "customer_id": 193,
+      "customer_name": "Polite Patty",
+      "email_content": "Dearest Sirs,\n\nI pray this email finds you well. I am humbly inquiring about the whereabouts of my parcel, tracking code DHL_ROYAL_MAIL.\n\nYours sincerely,\nPatty",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "delivery_delay",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 107,
+    "input_state": {
+      "customer_id": 194,
+      "customer_name": "Rude Rick",
+      "email_content": "GIVE ME MY MONEY BACK. TXN_SCAM_ARTISTS.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "transaction_inquiry",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 108,
+    "input_state": {
+      "customer_id": 195,
+      "customer_name": "Foreign Fiona",
+      "email_content": "Hola, tracking numero UPS_ESPANOL. Donde esta?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "delivery_delay",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 109,
+    "input_state": {
+      "customer_id": 196,
+      "customer_name": "Tech Tom",
+      "email_content": "I am getting a 404 error on your checkout page.",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "other",
+      "urgency": "not_urgent"
+    }
+  },
+  {
+    "test_no": 110,
+    "input_state": {
+      "customer_id": 197,
+      "customer_name": "Lost Larry",
+      "email_content": "Do you sell tires?",
+      "case_memory": null
+    },
+    "expected": {
+      "topic": "product_availability_or_recommendation",
+      "urgency": "not_urgent"
+    }
+  }
+]

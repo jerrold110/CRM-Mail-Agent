@@ -3,7 +3,9 @@
 This document outlines the approach to evaluating the CRM email agent system by describing the functional aspects of the agentic system that require evaluation, how they will be evluated, and the offline evaluation methodology.
 
 # Evaluation methodology
-Construct evaluation set that defines input state and expected outcome. LLM mutatations to introduce ambiguity/inject rare idioms/mutate working examples.  Use LLM to generate distributional interpolation (e.g., Blend two intents to create an ambiguous request).
+Construct evaluation set that defines input state and expected outcome. 
+- LLM mutatations to introduce ambiguity/inject rare idioms/mutate working examples. 
+- Use LLM to generate distributional interpolation (e.g., Blend two intents to create an ambiguous request).
 
 Write functions to read from a structured evaluation set to test tools/planning/evaluation that output metric scores
 

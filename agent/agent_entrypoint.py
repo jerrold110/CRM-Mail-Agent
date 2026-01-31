@@ -87,6 +87,15 @@ product_availability_email = """
     Regards,
     Michael
 """
+
+product_availability_email_urgent = """
+    Dear Sir/Madam,
+
+    We urgently need to place an order of Addidas football shoes because our team is competing in the state finals next weekend. We request an immediate response.
+
+    Regards,
+    Michael
+"""
 # UPS321654987
 delivery_delay_email = """
     Dear sir,
@@ -108,10 +117,9 @@ delivery_delay_email_2 = """
 urgent_email = """
     Dear sir/madam,
 
-    I HAVE A BOMB AND WILL BLOW UP YOUR STORE
+    I ordered a shipment of PUMA shoes, the shoes have a manufacturing defect that caused the death of one of our employees. Please contact us immediately
 
     Regards
-
     """
 
 product_availability_email_puma = """
@@ -125,17 +133,23 @@ product_availability_email_puma = """
     Michael
     """
 
+other_email = """
+    Dear Sir/Madam,
+
+    What time does your store close on saturday evening?
+
+    Regards,
+    Michael
+    """
+
 delete_customer_support_history(4000, 4000)
 
 job_id = uuid.uuid4()
 
 num = 4000
 
-eval_output = invoke_agent(num, "Michael", num, product_availability_email_puma, job_id)
+eval_output = invoke_agent(num, "Michael", num, product_availability_email_urgent, job_id)
 
 print('==========================================')
 print(eval_output)
 print('==========================================')
-
-
-

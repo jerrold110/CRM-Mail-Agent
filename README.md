@@ -1,7 +1,7 @@
 # **CRM-Mail-Agent**
-A straightforward agent system that handles customer support emails where system complexity is reduced to facilitate operational stability.
-- Fully integrated memory system with context compression that can respond to emails in context while reducing token cost
+A fullstack agent system for an athletic footwear Ecommerce business that responds to emails and takes appropriate actions with human-in-the-loop and agent memory and a robust agent evaluation framework. Uses Langfuse for monitoring.
 
+- Fully integrated memory system with context compression that can respond to emails in context while reducing token cost
 - Answer product inquiries, recommend products, check stocks and incoming deliveries
 - Respond to late delivery complaints, check delivery histories, credit fee refunds, provide coupons for retention
 - HITL for all actions and responses, agent runs asynchronously in real-time
@@ -21,7 +21,9 @@ A straightforward agent system that handles customer support emails where system
 ## Agent memory system
 ![System diagram](images/agentProcess.png "Optional title")
 
-## Agent diagram
+This diagram shows how the agent's memory is updated and accessed at each stage of the email conversation between Customer service and the Customer. The memory stores summaries of emails so as to reduce LLM token input and save cost when memory is used.
+
+## Agent workflow diagram
 ![System diagram](images/agentGraph.png "Optional title")
 
 ## Python frameworks

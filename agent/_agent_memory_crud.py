@@ -58,6 +58,8 @@ def update_customer_support_history(
     """
     Namespace and key have to be strings
     Passing the entire history prevents unnecessary reading from the database
+
+    from_customer is not in use at the moment
     """
     assert message_history is None or isinstance(message_history, dict)
     namespace = ("email_conversation_history", str(customer_id))
@@ -94,6 +96,32 @@ def delete_customer_support_history(
     ):
 
         store.put(namespace, key, None)
+
+def add_customer_support_history(
+        customer_id:int, 
+        case_id:int, 
+        value: dict
+    ):
+    """
+    This is only used in testing and not in production
+    
+    Entries follow the format:
+    {
+        '0': 'this is a message',
+        '1': 'this is a response to the first message'
+        '2': 'this is a response to the second message'
+    }
+    """
+
+    namespace = ("email_conversation_history", str(customer_id))
+    key = str(case_id)
+
+    with (
+        PostgresStore.from_conn_string(DB_URI) as store,  
+        PostgresSaver.from_conn_string(DB_URI) as checkpointer,
+    ):
+        store.put(namespace, key, value)
+        print(f'Put value: {value}')
 
     
 
