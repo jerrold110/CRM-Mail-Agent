@@ -16,7 +16,7 @@ conversation
 More than 3 concurrent requests, -> human escalation
 Respond in context
 
-classify_email data generation prompt:
+====classify_email data generation prompt:
 I want you to look at this ai agent evaluation set in json format for a sports shoes e-commerce email agent, and generate more evaluation examples that continue this json file. There are 10 evaluations in here, generate about 100 high quality evaluations with realistic emails in a new json file. In these examples you may introduce ambiguity, use rare idioms, mutations of working examples, and blend two intents to create an ambiguous request. 
 
 Explanation of fields:
@@ -32,3 +32,27 @@ Valid values of topic are:
 Valid values of urgency are:
 - urgent: customers with urgent requests, disasters, very important emails
 - not_urgent
+
+
+===get_comprehensive_product_query data gen prompt:
+
+Here is the schema for a table in postgres
+Schema:
+    Table: shoe_characteristics
+    Columns:
+    - size (Decimal(3,1)): the size of the shoe
+    - color (VARCHAR(50)): the color
+    - weight (DECIMAL(5,2)): the weight in grams
+    - brand (TEXT): brand of the shoe: the brand
+
+I am developing an ai agent that translates emails into sql queries for this table and need to evaluate the agent. I am using json syntax to structure the expected input and output, here are the rules and a few examples. Can you generate 7 more examples for me?
+
+Rules:
+    - ONLY Filter by the columns listed in the schema using the where clause
+    - Do NOT invent columns or tables.
+    - Always use SELECT *.
+    - Return at most 500 rows.
+    - For string columns, apply the lower() function to both sides
+    - If the question cannot be answered with the schema, return: CANNOT_ANSWER
+
+    

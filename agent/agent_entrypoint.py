@@ -79,77 +79,78 @@ def invoke_agent(customer_id: int, customer_name: str, case_id: int, email_conte
     return eval_output
 
 
-product_availability_email = """
-    Dear Sir/Madam,
+if __name__ == "__main__":
+    product_availability_email = """
+        Dear Sir/Madam,
 
-    I would like to inquire the availability of red leather shoes that will help me run fast
+        I would like to inquire the availability of red leather shoes that will help me run fast
 
-    Regards,
-    Michael
-"""
-
-product_availability_email_urgent = """
-    Dear Sir/Madam,
-
-    We urgently need to place an order of Addidas football shoes because our team is competing in the state finals next weekend. We request an immediate response.
-
-    Regards,
-    Michael
-"""
-# UPS321654987
-delivery_delay_email = """
-    Dear sir,
-
-    I want to find out why my delivery is delayed, tracking number UPS321654987
-
-    """
-delivery_delay_email_1 = """
-    Dear sir,
-
-    I want to find out why my delivery is delayed
-
-    """
-delivery_delay_email_2 = """
-
-    tracking number UPS321654987
-
-    """
-urgent_email = """
-    Dear sir/madam,
-
-    I ordered a shipment of PUMA shoes, the shoes have a manufacturing defect that caused the death of one of our employees. Please contact us immediately
-
-    Regards
+        Regards,
+        Michael
     """
 
-product_availability_email_puma = """
-    Dear Sir/Madam,
+    product_availability_email_urgent = """
+        Dear Sir/Madam,
 
-    I would like to inquire the availability of Puma running shoes.
+        We urgently need to place an order of Addidas football shoes because our team is competing in the state finals next weekend. We request an immediate response.
 
-    Can you also recommend a pair of blue basketball shoes.
-
-    Regards,
-    Michael
+        Regards,
+        Michael
     """
+    # UPS321654987
+    delivery_delay_email = """
+        Dear sir,
 
-other_email = """
-    Dear Sir/Madam,
+        I want to find out why my delivery is delayed, tracking number UPS321654987
 
-    What time does your store close on saturday evening?
+        """
+    delivery_delay_email_1 = """
+        Dear sir,
 
-    Regards,
-    Michael
-    """
+        I want to find out why my delivery is delayed
 
-delete_customer_support_history(4000, 4000)
+        """
+    delivery_delay_email_2 = """
 
-job_id = uuid.uuid4()
+        tracking number UPS321654987
 
-num = 4000
+        """
+    urgent_email = """
+        Dear sir/madam,
 
-eval_output = invoke_agent(num, "Michael", num, product_availability_email_urgent, job_id)
+        I ordered a shipment of PUMA shoes, the shoes have a manufacturing defect that caused the death of one of our employees. Please contact us immediately
 
-print('==========================================')
-print(eval_output)
-print('==========================================')
+        Regards
+        """
+
+    product_availability_email_puma = """
+        Dear Sir/Madam,
+
+        I would like to inquire the availability of Puma running shoes.
+
+        Can you also recommend a pair of blue basketball shoes.
+
+        Regards,
+        Michael
+        """
+
+    other_email = """
+        Dear Sir/Madam,
+
+        What time does your store close on saturday evening?
+
+        Regards,
+        Michael
+        """
+
+    delete_customer_support_history(4000, 4000)
+
+    job_id = uuid.uuid4()
+
+    num = 4000
+
+    eval_output = invoke_agent(num, "Michael", num, product_availability_email_puma, job_id)
+
+    print('==========================================')
+    print(eval_output)
+    print('==========================================')

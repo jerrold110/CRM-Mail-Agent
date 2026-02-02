@@ -222,6 +222,8 @@ def get_comprehensive_product_query(state: EmailAgentState) -> str:
 
     Query -> SQL query -> Tabular output -> filter by specific thing the customer is asking for
 
+    Material is taken out of this list because LLM cannot distinguish what is a material and what is not, or what is available in the database, a human would have the same difficulty.
+
     """
 
     query = state.email_content
@@ -229,13 +231,13 @@ def get_comprehensive_product_query(state: EmailAgentState) -> str:
     text2sql_prompt = f"""
     You are an expert data analyst.
 
-    Your task is to translate a natural-language question into a single, valid, read-only SQL query. If there are multiple shoes mentioned use inclusive logic and not use exclusive logic to return everything in the query.
+    Your task is to translate a natural-language question into a single, valid, read-only SQL query that returns what the customer is looking for. If there are multiple shoes mentioned use inclusive logic and not use exclusive logic to return everything.
 
     Database:
     - Engine: PostgreSQL
 
     Rules:
-    - ONLY Filter by the columns listed in the schema using the where clause
+    - ONLY Filter by the columns listed in the schema using the where clause. If a column is optional, do not filter by it.
     - Do NOT invent columns or tables.
     - Always use SELECT *.
     - Return at most 500 rows.
@@ -257,6 +259,9 @@ def get_comprehensive_product_query(state: EmailAgentState) -> str:
 
     Question: Can you recommend any white shoes in size 9.5 that are comfortable and stylish?
     Answer: SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'white'\n AND size = 9.5\nLIMIT 500;
+
+    Question: I would like to inquire the availability of Puma running shoes.Can you also recommend a pair of blue basketball shoes?
+    Answer: SELECT * FROM shoe_characteristics\nWHERE lower(brand) = 'puma'\n OR (lower(color) = 'blue')\nLIMIT 500;
     """
 
     response = llm.invoke(

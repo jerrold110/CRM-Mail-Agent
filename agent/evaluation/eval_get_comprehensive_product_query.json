@@ -1,0 +1,1202 @@
+[
+    {
+        "test_no": 1,
+        "input_state":{
+            "customer_id": 1,
+            "customer_name": "Alvin Atkinson",
+            "email_content": "Dear Sir/Madam,\n\nCan you recommend any white shoes in size 9.5 that are comfortable and stylish?",
+            "case_memory": null
+        },
+        "expected":{
+            "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'white'\n AND size = 9.5\nLIMIT 500;"
+        }
+    },
+    {
+        "test_no": 2,
+        "input_state":{
+            "customer_id": 1,
+            "customer_name": "Michael",
+            "email_content": "Dear Sir/Madam,\n\nI am looking for blue mesh shoes in size 9.",
+            "case_memory": null
+        },
+        "expected":{
+            "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'blue'\n AND size = 9\nLIMIT 500;"
+        }
+    },
+    {
+        "test_no": 3,
+        "input_state":{
+            "customer_id": 1,
+            "customer_name": "Mick",
+            "email_content": "I would like to inquire the availability of Puma running shoes.Can you also recommend a pair of blue basketball shoes.",
+            "case_memory": null
+        },
+        "expected":{
+            "query": "SELECT * FROM shoe_characteristics\nWHERE lower(brand) = 'puma'\n   OR (lower(color) = 'blue')\nLIMIT 500;"
+        }
+    },
+    {
+        "test_no": 4,
+        "input_state":{
+            "customer_id": 2,
+            "customer_name": "Sarah Jenkins",
+            "email_content": "Hi there,\n\nI'm interested to see if you have any red or black sneakers in stock? I wear a size 7.",
+            "case_memory": null
+        },
+        "expected":{
+            "query": "SELECT * FROM shoe_characteristics\nWHERE (lower(color) = 'red' OR lower(color) = 'black')\n AND size = 7\nLIMIT 500;"
+        }
+    },
+    {
+        "test_no": 5,
+        "input_state":{
+            "customer_id": 3,
+            "customer_name": "Davide Rossi",
+            "email_content": "I am looking for a lightweight shoe. specifically something that weighs less than 250 grams.",
+            "case_memory": null
+        },
+        "expected":{
+            "query": "SELECT * FROM shoe_characteristics\nWHERE weight < 250\nLIMIT 500;"
+        }
+    },
+    {
+        "test_no": 6,
+        "input_state":{
+            "customer_id": 4,
+            "customer_name": "Emily Chen",
+            "email_content": "Can you please send me a list of all your leather shoes?",
+            "case_memory": null
+        },
+        "expected":{
+            "query": "CANNOT_ANSWER"
+        }
+    },
+    {
+        "test_no": 7,
+        "input_state":{
+            "customer_id": 5,
+            "customer_name": "Marcus Johnson",
+            "email_content": "Yo, do you guys have any Adidas shoes in size 10.5? Also looking for New Balance in the same size.",
+            "case_memory": null
+        },
+        "expected":{
+            "query": "SELECT * FROM shoe_characteristics\nWHERE (lower(brand) = 'adidas' OR lower(brand) = 'new balance')\n AND size = 10.5\nLIMIT 500;"
+        }
+    },
+    {
+        "test_no": 8,
+        "input_state":{
+            "customer_id": 6,
+            "customer_name": "Julia Roberts",
+            "email_content": "Hello,\n\nCould you sort your current inventory by price from lowest to highest?",
+            "case_memory": null
+        },
+        "expected":{
+            "query": "CANNOT_ANSWER"
+        }
+    },
+    {
+        "test_no": 9,
+        "input_state":{
+            "customer_id": 7,
+            "customer_name": "Tom Baker",
+            "email_content": "I need a pair of size 12 shoes. Brand doesn't matter, but I prefer Reebok if you have it.",
+            "case_memory": null
+        },
+        "expected":{
+            "query": "SELECT * FROM shoe_characteristics\nWHERE size = 12\nLIMIT 500;"
+        }
+    },
+    {
+    "test_no": 10,
+    "input_state":{
+        "customer_id": 8,
+        "customer_name": "Anita Patel",
+        "email_content": "Looking for green shoes. They need to be fairly heavy, maybe greater than 400g.",
+        "case_memory": null
+    },
+    "expected":{
+        "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'green'\n AND weight > 400\nLIMIT 500;"
+    }
+},
+{
+    "test_no": 11,
+    "input_state": {
+      "customer_id": 11,
+      "customer_name": "James Peterson",
+      "email_content": "Good morning,\n\nI'm looking to replace my old running shoes. Do you currently have any Nike shoes in stock? I usually wear size 11.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(brand) = 'nike'\n AND size = 11\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 12,
+    "input_state": {
+      "customer_id": 12,
+      "customer_name": "Linda Wei",
+      "email_content": "Hi, I need a pair of very light shoes for competition, definitely under 200 grams. Do you have anything?",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE weight < 200\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 13,
+    "input_state": {
+      "customer_id": 13,
+      "customer_name": "Carlos Gomez",
+      "email_content": "Can you check if you have any size 10 shoes available in red? If not red, black would also be fine.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE size = 10\n AND (lower(color) = 'red' OR lower(color) = 'black')\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 14,
+    "input_state": {
+      "customer_id": 14,
+      "customer_name": "Sophie Turner",
+      "email_content": "I am looking for cheap shoes, anything under $50.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "CANNOT_ANSWER"
+    }
+  },
+  {
+    "test_no": 15,
+    "input_state": {
+      "customer_id": 15,
+      "customer_name": "Robert Langdon",
+      "email_content": "Hello, I require a pair of Asics. Size 9.5 please.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(brand) = 'asics'\n AND size = 9.5\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 16,
+    "input_state": {
+      "customer_id": 16,
+      "customer_name": "Maria Garcia",
+      "email_content": "Do you have any New Balance shoes? I don't care about the color, but they must be size 7.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(brand) = 'new balance'\n AND size = 7\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 17,
+    "input_state": {
+      "customer_id": 17,
+      "customer_name": "Kenji Sato",
+      "email_content": "I'm looking for a specific aesthetic. Do you have any silver or gold shoes in size 8?",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE (lower(color) = 'silver' OR lower(color) = 'gold')\n AND size = 8\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 18,
+    "input_state": {
+      "customer_id": 18,
+      "customer_name": "Alice Wonderland",
+      "email_content": "I need hiking boots made of Gore-Tex material.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "CANNOT_ANSWER"
+    }
+  },
+  {
+    "test_no": 19,
+    "input_state": {
+      "customer_id": 19,
+      "customer_name": "Bruce Wayne",
+      "email_content": "I need black shoes. They should be heavy, at least 450g, for stability.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'black'\n AND weight >= 450\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 20,
+    "input_state": {
+      "customer_id": 20,
+      "customer_name": "Clark Kent",
+      "email_content": "Hi, do you have size 12 or 13 shoes available?",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE (size = 12 OR size = 13)\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 21,
+    "input_state": {
+      "customer_id": 21,
+      "customer_name": "Diana Prince",
+      "email_content": "I am looking for Wonder Woman themed shoes.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "CANNOT_ANSWER"
+    }
+  },
+  {
+    "test_no": 22,
+    "input_state": {
+      "customer_id": 22,
+      "customer_name": "Barry Allen",
+      "email_content": "I need red shoes. Brand doesn't matter, though I usually buy Puma.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'red'\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 23,
+    "input_state": {
+      "customer_id": 23,
+      "customer_name": "Hal Jordan",
+      "email_content": "Looking for green Lantern shoes... or just green shoes in general. Size 10.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'green'\n AND size = 10\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 24,
+    "input_state": {
+      "customer_id": 24,
+      "customer_name": "Arthur Curry",
+      "email_content": "Do you have any waterproof shoes?",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "CANNOT_ANSWER"
+    }
+  },
+  {
+    "test_no": 25,
+    "input_state": {
+      "customer_id": 25,
+      "customer_name": "Victor Stone",
+      "email_content": "I need high-tech shoes. Weight between 300 and 350 grams.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE weight >= 300 AND weight <= 350\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 26,
+    "input_state": {
+      "customer_id": 26,
+      "customer_name": "Steve Rogers",
+      "email_content": "I'm looking for a classic American brand. Do you have Converse in size 11?",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(brand) = 'converse'\n AND size = 11\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 27,
+    "input_state": {
+      "customer_id": 27,
+      "customer_name": "Tony Stark",
+      "email_content": "I need red and gold shoes. Size 9.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE (lower(color) = 'red' OR lower(color) = 'gold')\n AND size = 9\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 28,
+    "input_state": {
+      "customer_id": 28,
+      "customer_name": "Natasha Romanoff",
+      "email_content": "I need black shoes for a mission. Size 6.5.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'black'\n AND size = 6.5\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 29,
+    "input_state": {
+      "customer_id": 29,
+      "customer_name": "Clint Barton",
+      "email_content": "Do you have purple shoes? Size 10.5.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'purple'\n AND size = 10.5\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 30,
+    "input_state": {
+      "customer_id": 30,
+      "customer_name": "Peter Parker",
+      "email_content": "I need agile shoes, very light. Maybe under 250g. Red or blue would be cool.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE weight < 250\n AND (lower(color) = 'red' OR lower(color) = 'blue')\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 31,
+    "input_state": {
+      "customer_id": 31,
+      "customer_name": "Wanda Maximoff",
+      "email_content": "I am looking for scarlet shoes. Or just red.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE (lower(color) = 'scarlet' OR lower(color) = 'red')\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 32,
+    "input_state": {
+      "customer_id": 32,
+      "customer_name": "Stephen Strange",
+      "email_content": "I require blue footwear. Size 10.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'blue'\n AND size = 10\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 33,
+    "input_state": {
+      "customer_id": 33,
+      "customer_name": "T'Challa",
+      "email_content": "I need sneakers that are silent. Do you have any?",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "CANNOT_ANSWER"
+    }
+  },
+  {
+    "test_no": 34,
+    "input_state": {
+      "customer_id": 34,
+      "customer_name": "Scott Lang",
+      "email_content": "Do you have really small shoes? Like size 5?",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE size = 5\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 35,
+    "input_state": {
+      "customer_id": 35,
+      "customer_name": "Hope Van Dyne",
+      "email_content": "I need yellow shoes, size 6.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'yellow'\n AND size = 6\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 36,
+    "input_state": {
+      "customer_id": 36,
+      "customer_name": "Carol Danvers",
+      "email_content": "I need shoes for flight training. Just something durable. Size 8.5.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE size = 8.5\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 37,
+    "input_state": {
+      "customer_id": 37,
+      "customer_name": "Nick Fury",
+      "email_content": "I need black boots. Size 11. No branding visible if possible.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'black'\n AND size = 11\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 38,
+    "input_state": {
+      "customer_id": 38,
+      "customer_name": "Phil Coulson",
+      "email_content": "Do you have any vintage shoes?",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "CANNOT_ANSWER"
+    }
+  },
+  {
+    "test_no": 39,
+    "input_state": {
+      "customer_id": 39,
+      "customer_name": "Daisy Johnson",
+      "email_content": "I'm looking for something with good grip.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "CANNOT_ANSWER"
+    }
+  },
+  {
+    "test_no": 40,
+    "input_state": {
+      "customer_id": 40,
+      "customer_name": "Melinda May",
+      "email_content": "I need size 7 shoes. Brand doesn't matter.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE size = 7\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 41,
+    "input_state": {
+      "customer_id": 41,
+      "customer_name": "Leo Fitz",
+      "email_content": "I'm calculating the load. I need shoes that weigh exactly 350.5 grams.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE weight = 350.5\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 42,
+    "input_state": {
+      "customer_id": 42,
+      "customer_name": "Jemma Simmons",
+      "email_content": "Do you have any laboratory safe shoes?",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "CANNOT_ANSWER"
+    }
+  },
+  {
+    "test_no": 43,
+    "input_state": {
+      "customer_id": 43,
+      "customer_name": "Grant Ward",
+      "email_content": "I need shoes for trekking. Size 10.5. Ideally brown.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE size = 10.5\n AND lower(color) = 'brown'\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 44,
+    "input_state": {
+      "customer_id": 44,
+      "customer_name": "Alphonso Mackenzie",
+      "email_content": "I need big shoes, man. Size 14. Do you carry those?",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE size = 14\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 45,
+    "input_state": {
+      "customer_id": 45,
+      "customer_name": "Elena Rodriguez",
+      "email_content": "I need fast shoes. Red ones. Size 8.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'red'\n AND size = 8\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 46,
+    "input_state": {
+      "customer_id": 46,
+      "customer_name": "Matt Murdock",
+      "email_content": "I need comfortable shoes. Size 10. Black or dark grey.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE size = 10\n AND (lower(color) = 'black' OR lower(color) = 'dark grey')\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 47,
+    "input_state": {
+      "customer_id": 47,
+      "customer_name": "Foggy Nelson",
+      "email_content": "Do you have any dress shoes?",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "CANNOT_ANSWER"
+    }
+  },
+  {
+    "test_no": 48,
+    "input_state": {
+      "customer_id": 48,
+      "customer_name": "Karen Page",
+      "email_content": "I am looking for white sneakers. Size 7.5.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'white'\n AND size = 7.5\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 49,
+    "input_state": {
+      "customer_id": 49,
+      "customer_name": "Frank Castle",
+      "email_content": "I need black combat boots. Size 11.5. Brand irrelevant.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'black'\n AND size = 11.5\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 50,
+    "input_state": {
+      "customer_id": 50,
+      "customer_name": "Jessica Jones",
+      "email_content": "I need boots. Black. Size 8.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'black'\n AND size = 8\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 51,
+    "input_state": {
+      "customer_id": 51,
+      "customer_name": "Luke Cage",
+      "email_content": "I need yellow shoes. Size 13.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'yellow'\n AND size = 13\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 52,
+    "input_state": {
+      "customer_id": 52,
+      "customer_name": "Danny Rand",
+      "email_content": "I am looking for green and yellow shoes. Size 10.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE (lower(color) = 'green' OR lower(color) = 'yellow')\n AND size = 10\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 53,
+    "input_state": {
+      "customer_id": 53,
+      "customer_name": "Colleen Wing",
+      "email_content": "I need white shoes for training. Lightweight, under 250g.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'white'\n AND weight < 250\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 54,
+    "input_state": {
+      "customer_id": 54,
+      "customer_name": "Misty Knight",
+      "email_content": "I need shoes with metal detailing.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "CANNOT_ANSWER"
+    }
+  },
+  {
+    "test_no": 55,
+    "input_state": {
+      "customer_id": 55,
+      "customer_name": "Claire Temple",
+      "email_content": "I'm on my feet all day. I need comfortable shoes, size 8. Maybe Skechers or Nike.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE size = 8\n AND (lower(brand) = 'skechers' OR lower(brand) = 'nike')\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 56,
+    "input_state": {
+      "customer_id": 56,
+      "customer_name": "Wilson Fisk",
+      "email_content": "I require bespoke shoes. Do you offer custom sizing?",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "CANNOT_ANSWER"
+    }
+  },
+  {
+    "test_no": 57,
+    "input_state": {
+      "customer_id": 57,
+      "customer_name": "Vanessa Marianna",
+      "email_content": "I am looking for a gift. Size 12. Preferably purple.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE size = 12\n AND lower(color) = 'purple'\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 58,
+    "input_state": {
+      "customer_id": 58,
+      "customer_name": "James Rhodes",
+      "email_content": "I need grey shoes. Size 10 or 10.5.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'grey'\n AND (size = 10 OR size = 10.5)\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 59,
+    "input_state": {
+      "customer_id": 59,
+      "customer_name": "Sam Wilson",
+      "email_content": "Do you have red Nike shoes? Size 11.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'red'\n AND lower(brand) = 'nike'\n AND size = 11\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 60,
+    "input_state": {
+      "customer_id": 60,
+      "customer_name": "Bucky Barnes",
+      "email_content": "I need sturdy boots. Size 10. Black or dark blue.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE size = 10\n AND (lower(color) = 'black' OR lower(color) = 'dark blue')\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 61,
+    "input_state": {
+      "customer_id": 61,
+      "customer_name": "Loki Laufeyson",
+      "email_content": "I desire green shoes with gold accents. Size 9.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE (lower(color) = 'green' OR lower(color) = 'gold')\n AND size = 9\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 62,
+    "input_state": {
+      "customer_id": 62,
+      "customer_name": "Thor Odinson",
+      "email_content": "I need large shoes! Size 15! Do you have any?",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE size = 15\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 63,
+    "input_state": {
+      "customer_id": 63,
+      "customer_name": "Heimdall",
+      "email_content": "I see all... but I cannot see if you have orange shoes in size 12. Do you?",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'orange'\n AND size = 12\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 64,
+    "input_state": {
+      "customer_id": 64,
+      "customer_name": "Valkyrie",
+      "email_content": "I need white shoes. Brand doesn't matter, just need them for a party. Size 8.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'white'\n AND size = 8\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 65,
+    "input_state": {
+      "customer_id": 65,
+      "customer_name": "Hela",
+      "email_content": "I want green and black shoes. Size 8.5.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE (lower(color) = 'green' OR lower(color) = 'black')\n AND size = 8.5\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 66,
+    "input_state": {
+      "customer_id": 66,
+      "customer_name": "Grandmaster",
+      "email_content": "I want something colorful! Red, blue, or yellow! Size 10.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE (lower(color) = 'red' OR lower(color) = 'blue' OR lower(color) = 'yellow')\n AND size = 10\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 67,
+    "input_state": {
+      "customer_id": 67,
+      "customer_name": "Korg",
+      "email_content": "Hey min, I'm looking for some rock-colored shoes. Grey maybe? Size 14.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'grey'\n AND size = 14\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 68,
+    "input_state": {
+      "customer_id": 68,
+      "customer_name": "Miek",
+      "email_content": "I need shoes with blades attached.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "CANNOT_ANSWER"
+    }
+  },
+  {
+    "test_no": 69,
+    "input_state": {
+      "customer_id": 69,
+      "customer_name": "Peter Quill",
+      "email_content": "I need cool retro shoes. Like Reebok or New Balance. Size 10.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE (lower(brand) = 'reebok' OR lower(brand) = 'new balance')\n AND size = 10\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 70,
+    "input_state": {
+      "customer_id": 70,
+      "customer_name": "Gamora",
+      "email_content": "I need functional combat shoes. Black. Size 7.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'black'\n AND size = 7\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 71,
+    "input_state": {
+      "customer_id": 71,
+      "customer_name": "Drax",
+      "email_content": "I need invisible shoes.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "CANNOT_ANSWER"
+    }
+  },
+  {
+    "test_no": 72,
+    "input_state": {
+      "customer_id": 72,
+      "customer_name": "Rocket Raccoon",
+      "email_content": "I need small shoes for... reasons. Size 3? Do you have anything that small?",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE size = 3\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 73,
+    "input_state": {
+      "customer_id": 73,
+      "customer_name": "Groot",
+      "email_content": "I am Groot. (Translation: I need brown shoes, size 15).",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'brown'\n AND size = 15\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 74,
+    "input_state": {
+      "customer_id": 74,
+      "customer_name": "Mantis",
+      "email_content": "I am looking for green shoes. Size 6.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'green'\n AND size = 6\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 75,
+    "input_state": {
+      "customer_id": 75,
+      "customer_name": "Nebula",
+      "email_content": "I need blue or purple shoes. Size 8.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE (lower(color) = 'blue' OR lower(color) = 'purple')\n AND size = 8\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 76,
+    "input_state": {
+      "customer_id": 76,
+      "customer_name": "Yondu Udonta",
+      "email_content": "I'm looking for red shoes. Like my fin. Size 10.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'red'\n AND size = 10\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 77,
+    "input_state": {
+      "customer_id": 77,
+      "customer_name": "Kraglin Obfonteri",
+      "email_content": "Do you have any second-hand shoes?",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "CANNOT_ANSWER"
+    }
+  },
+  {
+    "test_no": 78,
+    "input_state": {
+      "customer_id": 78,
+      "customer_name": "Stakar Ogord",
+      "email_content": "I need gold shoes. Size 11.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'gold'\n AND size = 11\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 79,
+    "input_state": {
+      "customer_id": 79,
+      "customer_name": "Ayesha",
+      "email_content": "I only wear gold. Do you have gold shoes in size 7?",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'gold'\n AND size = 7\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 80,
+    "input_state": {
+      "customer_id": 80,
+      "customer_name": "Ego",
+      "email_content": "I need shoes that are part of a planet.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "CANNOT_ANSWER"
+    }
+  },
+  {
+    "test_no": 81,
+    "input_state": {
+      "customer_id": 81,
+      "customer_name": "Taserface",
+      "email_content": "I want intimidating shoes! Size 13. Black.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE size = 13\n AND lower(color) = 'black'\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 82,
+    "input_state": {
+      "customer_id": 82,
+      "customer_name": "Thanos",
+      "email_content": "I require perfect balance. Size 15. Do you have any purple shoes?",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE size = 15\n AND lower(color) = 'purple'\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 83,
+    "input_state": {
+      "customer_id": 83,
+      "customer_name": "Ebony Maw",
+      "email_content": "My master requires grey shoes. Size 10.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'grey'\n AND size = 10\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 84,
+    "input_state": {
+      "customer_id": 84,
+      "customer_name": "Proxima Midnight",
+      "email_content": "I need shoes for combat. Blue or black. Size 9.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE (lower(color) = 'blue' OR lower(color) = 'black')\n AND size = 9\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 85,
+    "input_state": {
+      "customer_id": 85,
+      "customer_name": "Corvus Glaive",
+      "email_content": "I need shoes with a low profile. Black. Size 10.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'black'\n AND size = 10\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 86,
+    "input_state": {
+      "customer_id": 86,
+      "customer_name": "Cull Obsidian",
+      "email_content": "Heavy shoes. Very heavy. Over 600 grams.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE weight > 600\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 87,
+    "input_state": {
+      "customer_id": 87,
+      "customer_name": "Shuri",
+      "email_content": "I'm looking for something modern. Maybe Puma? Size 7.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(brand) = 'puma'\n AND size = 7\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 88,
+    "input_state": {
+      "customer_id": 88,
+      "customer_name": "Okoye",
+      "email_content": "I need red shoes. Size 8.5.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'red'\n AND size = 8.5\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 89,
+    "input_state": {
+      "customer_id": 89,
+      "customer_name": "Nakia",
+      "email_content": "I need green shoes for a mission. Size 7.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'green'\n AND size = 7\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 90,
+    "input_state": {
+      "customer_id": 90,
+      "customer_name": "M'Baku",
+      "email_content": "I need fur-lined boots.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "CANNOT_ANSWER"
+    }
+  },
+  {
+    "test_no": 91,
+    "input_state": {
+      "customer_id": 91,
+      "customer_name": "Everett Ross",
+      "email_content": "Do you have any grey New Balance shoes? Size 9.5.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'grey'\n AND lower(brand) = 'new balance'\n AND size = 9.5\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 92,
+    "input_state": {
+      "customer_id": 92,
+      "customer_name": "Wong",
+      "email_content": "I need comfortable walking shoes. Brown. Size 8.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'brown'\n AND size = 8\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 93,
+    "input_state": {
+      "customer_id": 93,
+      "customer_name": "Ancient One",
+      "email_content": "I seek yellow shoes. Size 6.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'yellow'\n AND size = 6\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 94,
+    "input_state": {
+      "customer_id": 94,
+      "customer_name": "Kaecilius",
+      "email_content": "I need dark shoes. Black or dark purple. Size 10.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE (lower(color) = 'black' OR lower(color) = 'dark purple')\n AND size = 10\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 95,
+    "input_state": {
+      "customer_id": 95,
+      "customer_name": "Dormammu",
+      "email_content": "I need shoes that are infinite in size.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "CANNOT_ANSWER"
+    }
+  },
+  {
+    "test_no": 96,
+    "input_state": {
+      "customer_id": 96,
+      "customer_name": "Baron Mordo",
+      "email_content": "I need green shoes. Size 11. No magic involved.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'green'\n AND size = 11\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 97,
+    "input_state": {
+      "customer_id": 97,
+      "customer_name": "Christine Palmer",
+      "email_content": "I need white shoes for work at the hospital. Size 7.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE lower(color) = 'white'\n AND size = 7\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 98,
+    "input_state": {
+      "customer_id": 98,
+      "customer_name": "Nicodemus West",
+      "email_content": "Do you have any expensive designer shoes?",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "CANNOT_ANSWER"
+    }
+  },
+  {
+    "test_no": 99,
+    "input_state": {
+      "customer_id": 99,
+      "customer_name": "Pangborn",
+      "email_content": "I need shoes for playing basketball. Size 12. Maybe Nike?",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE size = 12\n AND lower(brand) = 'nike'\nLIMIT 500;"
+    }
+  },
+  {
+    "test_no": 100,
+    "input_state": {
+      "customer_id": 100,
+      "customer_name": "Stan Lee",
+      "email_content": "Excelsior! I need comfortable sneakers, any color, but they must be size 9.",
+      "case_memory": null
+    },
+    "expected": {
+      "query": "SELECT * FROM shoe_characteristics\nWHERE size = 9\nLIMIT 500;"
+    }
+  }
+]
