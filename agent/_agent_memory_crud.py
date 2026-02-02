@@ -121,7 +121,7 @@ def add_customer_support_history(
         PostgresSaver.from_conn_string(DB_URI) as checkpointer,
     ):
         store.put(namespace, key, value)
-        print(f'Put value: {value}')
+        # print(f'Put value: {value}')
 
     
 

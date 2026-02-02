@@ -68,7 +68,20 @@ def classify_email(state: EmailAgentState) -> Command[Literal["get_comprehensive
     Email history summary:
     {conversation_summary_formatted}
         
-    Provide classification including topic, urgency, and provide a summary. Each email must be closely related to the topic classification, if there are multiple request types in the email or you are unsure classify topic as 'other'. If the customer has sent an email with the same meaning that occurs more than three times in the email history, classify urgency as urgent. 
+    Provide classification including topic, urgency, and provide a summary, if there are multiple request types in the email, you are unsure, or no reply is needed classify topic as 'other'. If the customer has sent an email with the same meaning that occurs more than three times in the email history, classify urgency as urgent.
+    
+    Follow this guide for classifying topics:
+    - product_availability_or_recommendation: Question about the availability of a product or a request for product recommendation (related to sports equipment)
+    - delivery_delay: States that a delivery is late
+    - billing_dispute: Complaint about billing charges
+    - transaction_inquiry: Question about a transaction
+
+    These topics should also be urgent:
+    - Threats
+    - Accidents, harm
+    - Missing or defective products received
+    - Legal issues
+    - Response needed immediately
     """
 
     # Get structured response directly as dict
@@ -82,10 +95,10 @@ def classify_email(state: EmailAgentState) -> Command[Literal["get_comprehensive
     else:
         print('email could not be classified and is routed to human escalation')
         goto = "other"
-    print(conversation_summary_formatted)
-    print("Summary:", classification.summary)
-    print("Classification:", classification.topic)
-    print("urgency:", classification.urgency)
+    # print(conversation_summary_formatted)
+    # print("Summary:", classification.summary)
+    # print("Classification:", classification.topic)
+    # print("urgency:", classification.urgency)
     
     # Update memory with summary of customer email
     update_customer_support_history(
@@ -519,6 +532,6 @@ def invoke_agent(initial_state:dict, job_id:str):
 
 
 # ======= Test the agent ==========
-
+print("Agent Version: 0.0.1")
 
     

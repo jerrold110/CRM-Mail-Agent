@@ -1,0 +1,34 @@
+Generate more examples
+- request
+
+Valid values:
+topic: transaction_inquiry, product_availability_or_recommendation, delivery_delay,
+other
+urgency: urgent, not_urgent
+
+Memory:
+null
+conversation 
+{
+    0: customer email
+    1: customer support team email
+}
+More than 3 concurrent requests, -> human escalation
+Respond in context
+
+classify_email data generation prompt:
+I want you to look at this ai agent evaluation set in json format for a sports shoes e-commerce email agent, and generate more evaluation examples that continue this json file. There are 10 evaluations in here, generate about 100 high quality evaluations with realistic emails in a new json file. In these examples you may introduce ambiguity, use rare idioms, mutations of working examples, and blend two intents to create an ambiguous request. 
+
+Explanation of fields:
+input_state is the input. email_content is the content of the email. case_memory may be null or a dictionary and is used to respond in context to ongoing conversations to enable effective classification, and classify emails with more than three repeated emails with the same meaning from customers as urgent. The case_memory is an object where the key represents the order of the email starting at 0, and the value is the summarised meaning of the email.
+
+Valid values of topic are:
+- product_availability_or_recommendation: Question about availability of a product or a request for a product to be recommended
+- delivery_delay: Matters related to late delivery
+- billing_dispute: Complaint about billing charges
+- transaction_inquiry: Question about a transaction made
+- other: emails with multiple request types, or an unclear topic
+
+Valid values of urgency are:
+- urgent: customers with urgent requests, disasters, very important emails
+- not_urgent

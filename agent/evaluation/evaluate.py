@@ -5,6 +5,9 @@ sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 )
 
+import json
+from pathlib import Path
+BASE_DIR = Path(__file__).resolve().parent
 
 # import the objects from email_agent.py
 from email_agent import *
@@ -46,50 +49,36 @@ def get_node_output(test_case:dict, node_n):
 
     return node_output
 
-def eval_email_classifier(test_case:dict):
-    # Sets memory and initial state, returns node output
-    state_output = get_node_output(test_case, classify_email)
+def get_eval_results_email_classifier():
 
-    test_no = test_case['test_no']
+    file_path = BASE_DIR / "eval_classify_email_long.json"
 
-    output_topic = state_output.update['classification'].topic
-    output_urgency = state_output.update['classification'].urgency
-
-    expected_topic = test_case['expected']['topic']
-    expected_urgency = test_case['expected']['urgency']
-
-    topic_res = output_topic == expected_topic
-    if expected_urgency == 'urgent' and output_urgency == 'urgent':
-        urgency_res = 'TP'
-    elif expected_urgency != 'urgent' and output_urgency == 'urgent':
-        urgency_res = 'FP'
-    elif expected_urgency == 'urgent' and output_urgency != 'urgent':
-        urgency_res = 'FN'
-    elif expected_urgency != 'urgent' and output_urgency != 'urgent':
-        urgency_res = 'TN'
-
-    return (test_no, topic_res, urgency_res)
-
-
-def get_evaluation_results(file_path:str, evaluator_func):
     # read json file
     with open(file_path, "r", encoding="utf-8") as f:
         json_array = json.load(f)
 
     # run evaluation for each case and aggregate results
     results = []
-    for case in json_array:
-        result = evaluator_func(case)
+    for test_case in json_array:
+        test_no = test_case['test_no']
+        print(f"Test case: {test_no}")
+
+        # Sets memory and initial state then deletes memory
+        state_output = get_node_output(test_case, classify_email)
+        output_topic = state_output.update['classification'].topic
+        output_urgency = state_output.update['classification'].urgency
+        output_urgency = True if output_urgency=='urgent' else False
+        expected_topic = test_case['expected']['topic']
+        expected_urgency = test_case['expected']['urgency']
+        expected_urgency = True if expected_urgency=='urgent' else False
+        
+        result = (test_no, output_topic, output_urgency, expected_topic, expected_urgency)
+
         results.append(result)
 
     return results
 
-import json
-from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent
-json_path = BASE_DIR / "eval_classify_email.json"
+print("Evaluation Version: 0.0.3")
 
-result = get_evaluation_results(json_path, eval_email_classifier)
-print(result)
 
