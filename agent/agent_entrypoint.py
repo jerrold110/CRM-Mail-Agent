@@ -83,7 +83,7 @@ if __name__ == "__main__":
     product_availability_email = """
         Dear Sir/Madam,
 
-        I would like to inquire the availability of red leather shoes that will help me run fast
+        Do you carry any boots suitable for hiking? I need something durable in a size 8.5
 
         Regards,
         Michael
@@ -149,7 +149,7 @@ if __name__ == "__main__":
 
     num = 4000
 
-    eval_output = invoke_agent(num, "Michael", num, product_availability_email_puma, job_id)
+    eval_output = invoke_agent(num, "Michael", num, product_availability_email, job_id)
 
     print('==========================================')
     print(eval_output)

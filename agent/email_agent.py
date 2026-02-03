@@ -279,6 +279,8 @@ def match_closest_product(state: EmailAgentState) -> Command[Literal["check_inve
 
     Prompt the LLM to determine if there if there are products that matches the description(s) provided by the customer.
 
+    This system can be improved where tags are extracted from the product descriptions and used to match against customer requirements.
+
     """
     #valid_brands = get_unique_list('brand')
     #valid_colors = get_unique_list('color')
@@ -302,7 +304,7 @@ def match_closest_product(state: EmailAgentState) -> Command[Literal["check_inve
         )
     else:
         product_match_prompt = f"""
-        Match the products the client is looking for to the closest products we have in our product catalogue which is in csv format. Pay attention to specific requests about size. Tell me what the client is looking for and the ids of the matching products.
+        Match the products the client is looking for to the closest products we have in our product catalogue which is in csv format. Tell me what the client is looking for and the ids of the matching products in as few words as possible.
 
         Client email: {state.email_content}
 
@@ -310,7 +312,7 @@ def match_closest_product(state: EmailAgentState) -> Command[Literal["check_inve
         {product_characteristics}
         """
 
-        response = llm.invoke(product_match_prompt) # AIMessage type
+        response = llm.invoke(product_match_prompt, max_tokens=128) # AIMessage type
         response = response.content
 
         return Command(
@@ -537,6 +539,6 @@ def invoke_agent(initial_state:dict, job_id:str):
 
 
 # ======= Test the agent ==========
-print("Agent Version: 0.0.1")
+print("Agent Version: 0.0.5")
 
     

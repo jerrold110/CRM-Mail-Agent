@@ -19,6 +19,7 @@ INSERT INTO public.shoe_characteristics (
     product_id, product_name, size, color, material, weight, brand, price, description
 )
 VALUES
+    -- ORIGINAL 60 ROWS
     (1, 'Nike Air Max', 10.0, 'Red', 'Leather', 0.80, 'Nike', 129.99, 'The Nike Air Max offers great cushioning and stylish design.'),
     (2, 'Nike Air Max', 9.5, 'Red', 'Leather', 0.80, 'Nike', 129.99, 'The Nike Air Max offers great cushioning and stylish design.'),
     (3, 'Adidas Ultraboost', 10.0, 'Black', 'Mesh', 0.70, 'Adidas', 180.00, 'The Adidas Ultraboost is known for its comfort and breathability.'),
@@ -78,7 +79,47 @@ VALUES
     (57, 'Mizuno Wave Rider', 10.0, 'Blue', 'Mesh', 0.76, 'Mizuno', 125.00, 'The Mizuno Wave Rider provides smooth and stable rides.'),
     (58, 'Mizuno Wave Rider', 9.5, 'Black', 'Mesh', 0.76, 'Mizuno', 125.00, 'The Mizuno Wave Rider provides smooth and stable rides.'),
     (59, 'Mizuno Wave Rider', 11.0, 'White', 'Mesh', 0.76, 'Mizuno', 125.00, 'The Mizuno Wave Rider provides smooth and stable rides.'),
-    (60, 'Mizuno Wave Rider', 8.5, 'Orange', 'Mesh', 0.76, 'Mizuno', 125.00, 'The Mizuno Wave Rider provides smooth and stable rides.');
+    (60, 'Mizuno Wave Rider', 8.5, 'Orange', 'Mesh', 0.76, 'Mizuno', 125.00, 'The Mizuno Wave Rider provides smooth and stable rides.'),
+    (61, 'Timberland Premium Boot', 10.0, 'Wheat', 'Nubuck', 1.20, 'Timberland', 198.00, 'The classic waterproof boot designed for durability and style.'),
+    (62, 'Timberland Premium Boot', 11.0, 'Black', 'Nubuck', 1.20, 'Timberland', 198.00, 'The classic waterproof boot designed for durability and style.'),
+    (63, 'Timberland Premium Boot', 9.5, 'Wheat', 'Nubuck', 1.20, 'Timberland', 198.00, 'The classic waterproof boot designed for durability and style.'),
+    (64, 'Timberland Premium Boot', 8.5, 'Black', 'Nubuck', 1.20, 'Timberland', 198.00, 'The classic waterproof boot designed for durability and style.'),
+    (65, 'Dr. Martens 1460', 10.0, 'Black', 'Leather', 1.10, 'Dr. Martens', 170.00, 'The original Dr. Martens boot with air-cushioned sole.'),
+    (66, 'Dr. Martens 1460', 9.5, 'Cherry Red', 'Leather', 1.10, 'Dr. Martens', 170.00, 'The original Dr. Martens boot with air-cushioned sole.'),
+    (67, 'Dr. Martens 1460', 11.0, 'Black', 'Leather', 1.10, 'Dr. Martens', 170.00, 'The original Dr. Martens boot with air-cushioned sole.'),
+    (68, 'Dr. Martens 1460', 8.5, 'White', 'Leather', 1.10, 'Dr. Martens', 170.00, 'The original Dr. Martens boot with air-cushioned sole.'),
+    (69, 'Skechers Go Walk', 10.0, 'Grey', 'Mesh', 0.55, 'Skechers', 65.00, 'Lightweight walking shoe with responsive cushioning.'),
+    (70, 'Skechers Go Walk', 9.5, 'Navy', 'Mesh', 0.55, 'Skechers', 65.00, 'Lightweight walking shoe with responsive cushioning.'),
+    (71, 'Skechers Go Walk', 11.0, 'Black', 'Mesh', 0.55, 'Skechers', 65.00, 'Lightweight walking shoe with responsive cushioning.'),
+    (72, 'Skechers Go Walk', 8.5, 'Taupe', 'Mesh', 0.55, 'Skechers', 65.00, 'Lightweight walking shoe with responsive cushioning.'),
+    (73, 'Jordan Air 1', 10.0, 'Red/Black', 'Leather', 0.90, 'Jordan', 180.00, 'The iconic high-top sneaker that started it all.'),
+    (74, 'Jordan Air 1', 11.0, 'Blue/White', 'Leather', 0.90, 'Jordan', 180.00, 'The iconic high-top sneaker that started it all.'),
+    (75, 'Jordan Air 1', 9.5, 'Grey', 'Leather', 0.90, 'Jordan', 180.00, 'The iconic high-top sneaker that started it all.'),
+    (76, 'Jordan Air 1', 12.0, 'Red/Black', 'Leather', 0.90, 'Jordan', 180.00, 'The iconic high-top sneaker that started it all.'),
+    (77, 'On Cloud 5', 10.0, 'Black', 'Mesh', 0.45, 'On Running', 139.99, 'Ultra-lightweight shoe built for all-day comfort.'),
+    (78, 'On Cloud 5', 9.5, 'White', 'Mesh', 0.45, 'On Running', 139.99, 'Ultra-lightweight shoe built for all-day comfort.'),
+    (79, 'On Cloud 5', 11.0, 'Navy', 'Mesh', 0.45, 'On Running', 139.99, 'Ultra-lightweight shoe built for all-day comfort.'),
+    (80, 'On Cloud 5', 8.5, 'Green', 'Mesh', 0.45, 'On Running', 139.99, 'Ultra-lightweight shoe built for all-day comfort.'),
+    (81, 'Fila Disruptor II', 10.0, 'White', 'Synthetic', 0.85, 'Fila', 75.00, 'Chunky retro sneaker with a saw-tooth sole.'),
+    (82, 'Fila Disruptor II', 9.5, 'White', 'Synthetic', 0.85, 'Fila', 75.00, 'Chunky retro sneaker with a saw-tooth sole.'),
+    (83, 'Fila Disruptor II', 8.5, 'Pink', 'Synthetic', 0.85, 'Fila', 75.00, 'Chunky retro sneaker with a saw-tooth sole.'),
+    (84, 'Fila Disruptor II', 11.0, 'Black', 'Synthetic', 0.85, 'Fila', 75.00, 'Chunky retro sneaker with a saw-tooth sole.'),
+    (85, 'Birkenstock Arizona', 10.0, 'Brown', 'Suede', 0.50, 'Birkenstock', 110.00, 'Two-strap sandal with a cork-latex footbed.'),
+    (86, 'Birkenstock Arizona', 9.5, 'Black', 'Leather', 0.50, 'Birkenstock', 120.00, 'Two-strap sandal with a cork-latex footbed.'),
+    (87, 'Birkenstock Arizona', 11.0, 'Taupe', 'Suede', 0.50, 'Birkenstock', 110.00, 'Two-strap sandal with a cork-latex footbed.'),
+    (88, 'Birkenstock Arizona', 8.5, 'Mocha', 'Suede', 0.50, 'Birkenstock', 110.00, 'Two-strap sandal with a cork-latex footbed.'),
+    (89, 'Merrell Moab 2', 10.0, 'Earth', 'Leather/Mesh', 0.95, 'Merrell', 120.00, 'Durable hiking boot with ventilated support.'),
+    (90, 'Merrell Moab 2', 11.0, 'Walnut', 'Leather/Mesh', 0.95, 'Merrell', 120.00, 'Durable hiking boot with ventilated support.'),
+    (91, 'Merrell Moab 2', 9.5, 'Granite', 'Leather/Mesh', 0.95, 'Merrell', 120.00, 'Durable hiking boot with ventilated support.'),
+    (92, 'Merrell Moab 2', 8.5, 'Earth', 'Leather/Mesh', 0.95, 'Merrell', 120.00, 'Durable hiking boot with ventilated support.'),
+    (93, 'Crocs Classic Clog', 10.0, 'Green', 'Foam', 0.30, 'Crocs', 49.99, 'Water-friendly clog with ventilation ports.'),
+    (94, 'Crocs Classic Clog', 11.0, 'Black', 'Foam', 0.30, 'Crocs', 49.99, 'Water-friendly clog with ventilation ports.'),
+    (95, 'Crocs Classic Clog', 9.5, 'Yellow', 'Foam', 0.30, 'Crocs', 49.99, 'Water-friendly clog with ventilation ports.'),
+    (96, 'Crocs Classic Clog', 8.5, 'Navy', 'Foam', 0.30, 'Crocs', 49.99, 'Water-friendly clog with ventilation ports.'),
+    (97, 'Adidas Stan Smith', 10.0, 'White/Green', 'Leather', 0.70, 'Adidas', 95.00, 'Timeless tennis shoe with perforated 3-Stripes.'),
+    (98, 'Adidas Stan Smith', 9.5, 'White/Blue', 'Leather', 0.70, 'Adidas', 95.00, 'Timeless tennis shoe with perforated 3-Stripes.'),
+    (99, 'Adidas Stan Smith', 11.0, 'White/Green', 'Leather', 0.70, 'Adidas', 95.00, 'Timeless tennis shoe with perforated 3-Stripes.'),
+    (100, 'Adidas Stan Smith', 8.5, 'Black', 'Leather', 0.70, 'Adidas', 95.00, 'Timeless tennis shoe with perforated 3-Stripes.');
 
 
 -- Create the inventory table
@@ -157,7 +198,47 @@ VALUES
     (57, 'Mizuno Wave Rider', 95),
     (58, 'Mizuno Wave Rider', 100),
     (59, 'Mizuno Wave Rider', 90),
-    (60, 'Mizuno Wave Rider', 85);
+    (60, 'Mizuno Wave Rider', 85),
+    (61, 'Timberland Premium Boot', 40),
+    (62, 'Timberland Premium Boot', 35),
+    (63, 'Timberland Premium Boot', 0),   -- Stockout
+    (64, 'Timberland Premium Boot', 20),
+    (65, 'Dr. Martens 1460', 50),
+    (66, 'Dr. Martens 1460', 45),
+    (67, 'Dr. Martens 1460', 60),
+    (68, 'Dr. Martens 1460', 55),
+    (69, 'Skechers Go Walk', 120),
+    (70, 'Skechers Go Walk', 110),
+    (71, 'Skechers Go Walk', 0),     -- Stockout
+    (72, 'Skechers Go Walk', 100),
+    (73, 'Jordan Air 1', 15),
+    (74, 'Jordan Air 1', 10),
+    (75, 'Jordan Air 1', 0),         -- Stockout (High Demand)
+    (76, 'Jordan Air 1', 5),
+    (77, 'On Cloud 5', 80),
+    (78, 'On Cloud 5', 75),
+    (79, 'On Cloud 5', 85),
+    (80, 'On Cloud 5', 90),
+    (81, 'Fila Disruptor II', 60),
+    (82, 'Fila Disruptor II', 65),
+    (83, 'Fila Disruptor II', 50),
+    (84, 'Fila Disruptor II', 55),
+    (85, 'Birkenstock Arizona', 40),
+    (86, 'Birkenstock Arizona', 0),  -- Stockout
+    (87, 'Birkenstock Arizona', 25),
+    (88, 'Birkenstock Arizona', 30),
+    (89, 'Merrell Moab 2', 70),
+    (90, 'Merrell Moab 2', 75),
+    (91, 'Merrell Moab 2', 65),
+    (92, 'Merrell Moab 2', 60),
+    (93, 'Crocs Classic Clog', 200),
+    (94, 'Crocs Classic Clog', 180),
+    (95, 'Crocs Classic Clog', 0),   -- Stockout
+    (96, 'Crocs Classic Clog', 150),
+    (97, 'Adidas Stan Smith', 90),
+    (98, 'Adidas Stan Smith', 85),
+    (99, 'Adidas Stan Smith', 95),
+    (100, 'Adidas Stan Smith', 100);
 
 
 -- Create the incoming_deliveries table

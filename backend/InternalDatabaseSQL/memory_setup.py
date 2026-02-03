@@ -1,5 +1,9 @@
 from langgraph.checkpoint.postgres import PostgresSaver
-from langgraph.store.postgres import PostgresStore  
+from langgraph.store.postgres import PostgresStore 
+
+"""
+script to setup Postgres Langgraph memory
+"""
 
 DB_URI = "postgresql://admin:admin@localhost:5432/agent_memory?sslmode=disable"
 

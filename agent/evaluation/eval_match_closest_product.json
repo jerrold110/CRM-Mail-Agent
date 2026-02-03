@@ -1,0 +1,1302 @@
+[
+  {
+    "test_no": 1,
+    "input_state": {
+      "customer_id": 1,
+      "customer_name": "Alvin Atkinson",
+      "email_content": "Hi there, I'm trying to find a pair of Red Nike Air Max shoes. I usually wear a size 11. Do you have these in stock?",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [8]
+    }
+  },
+  {
+    "test_no": 2,
+    "input_state": {
+      "customer_id": 1,
+      "customer_name": "Alvin Atkinson",
+      "email_content": "I need a new pair of canvas sneakers for daily wear. I'm a size 9.5. Open to any brand you have",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [26, 30]
+    }
+  },
+  {
+    "test_no": 3,
+    "input_state": {
+      "customer_id": 1,
+      "customer_name": "Alvin Atkinson",
+      "email_content": "Do you carry any boots suitable for hiking? I need something durable in a size 8.5",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [92]
+    }
+  },
+  {
+    "test_no": 4,
+    "input_state": {
+      "customer_id": 1,
+      "customer_name": "Alvin Atkinson",
+      "email_content": "I'm looking for some white leather Adidas shoes. Do you have anything like that?",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [97, 98, 99]
+    }
+  },
+  {
+    "test_no": 5,
+    "input_state": {
+      "customer_id": 5,
+      "customer_name": "Alvin Atkinson",
+      "email_content": "Hello, do you have any gold high heels or formal shoes in size 7? I need them for a wedding.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": []
+    }
+  },
+  {
+    "test_no": 6,
+    "input_state": {
+      "customer_id": 6,
+      "customer_name": "Sarah Connor",
+      "email_content": "My dogs are barking! I need your most comfortable running shoes with lots of cushioning. Size 10.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [3, 21, 49, 69]
+    }
+  },
+  {
+    "test_no": 7,
+    "input_state": {
+      "customer_id": 7,
+      "customer_name": "Mike Ross",
+      "email_content": "Yo, I need some fresh Timbs. The classic wheat color. Size 9.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [63]
+    }
+  },
+  {
+    "test_no": 8,
+    "input_state": {
+      "customer_id": 8,
+      "customer_name": "Emily Blunt",
+      "email_content": "I'm looking for those chunky retro sneakers with the jagged saw-tooth sole. I think they are Filas? Size 11.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [84]
+    }
+  },
+  {
+    "test_no": 9,
+    "input_state": {
+      "customer_id": 9,
+      "customer_name": "John Wick",
+      "email_content": "I require tactical footwear. Black, synthetic, good for trail running. Size 10.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [53]
+    }
+  },
+  {
+    "test_no": 10,
+    "input_state": {
+      "customer_id": 10,
+      "customer_name": "Tony Stark",
+      "email_content": "Do you stock Saloman shoes? I need a blue pair, size 9.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [54]
+    }
+  },
+  {
+    "test_no": 11,
+    "input_state": {
+      "customer_id": 11,
+      "customer_name": "Bruce Wayne",
+      "email_content": "I need black boots. Waterproof is a must. Size 11.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [62]
+    }
+  },
+  {
+    "test_no": 12,
+    "input_state": {
+      "customer_id": 12,
+      "customer_name": "Peter Parker",
+      "email_content": "I'm looking for shoes that are good for skateboarding. Size 10.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [29]
+    }
+  },
+  {
+    "test_no": 13,
+    "input_state": {
+      "customer_id": 13,
+      "customer_name": "Clark Kent",
+      "email_content": "Do you have the shoes with the three stripes? I need a white pair size 10.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [97]
+    }
+  },
+  {
+    "test_no": 14,
+    "input_state": {
+      "customer_id": 14,
+      "customer_name": "Diana Prince",
+      "email_content": "I need running shoes but I don't use animal products. No leather or suede. Size 8.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [12, 36, 40, 44, 48, 52, 60, 80]
+    }
+  },
+  {
+    "test_no": 15,
+    "input_state": {
+      "customer_id": 15,
+      "customer_name": "Wade Wilson",
+      "email_content": "Do you have any Crocs? Looking for the water friendly ones in Green, size 10.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [93]
+    }
+  },
+  {
+    "test_no": 16,
+    "input_state": {
+      "customer_id": 16,
+      "customer_name": "Walter White",
+      "email_content": "I need comfortable walking shoes. Skechers preferably. Size 11.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [71]
+    }
+  },
+  {
+    "test_no": 17,
+    "input_state": {
+      "customer_id": 17,
+      "customer_name": "Jesse Pinkman",
+      "email_content": "Yo, looking for some Vans. Red canvas. Size 8.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [32]
+    }
+  },
+  {
+    "test_no": 18,
+    "input_state": {
+      "customer_id": 18,
+      "customer_name": "Saul Goodman",
+      "email_content": "I need something flashy but professional. Maybe those Nike Air Max in white leather? Size 10.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [10]
+    }
+  },
+  {
+    "test_no": 19,
+    "input_state": {
+      "customer_id": 19,
+      "customer_name": "Gus Fring",
+      "email_content": "I require footwear that is meticulous and durable. Dr. Martens, black leather. Size 10.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [65]
+    }
+  },
+  {
+    "test_no": 20,
+    "input_state": {
+      "customer_id": 20,
+      "customer_name": "Hank Schrader",
+      "email_content": "Got any Merrell hiking boots? Need something tough for the desert. Size 11.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [90]
+    }
+  },
+  {
+    "test_no": 21,
+    "input_state": {
+      "customer_id": 21,
+      "customer_name": "Skyler White",
+      "email_content": "I'm looking for running shoes, Asics specifically. Need stability. Size 8.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [36]
+    }
+  },
+  {
+    "test_no": 22,
+    "input_state": {
+      "customer_id": 22,
+      "customer_name": "Marie Schrader",
+      "email_content": "Do you have anything in purple? Size 7.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": []
+    }
+  },
+  {
+    "test_no": 23,
+    "input_state": {
+      "customer_id": 23,
+      "customer_name": "Mike Ehrmantraut",
+      "email_content": "No nonsense shoes. New Balance, grey suede. Size 9.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [22]
+    }
+  },
+  {
+    "test_no": 24,
+    "input_state": {
+      "customer_id": 24,
+      "customer_name": "Lydia Rodarte-Quayle",
+      "email_content": "I need high-performance running shoes. Under Armour HOVR, white knit. Size 11.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [39]
+    }
+  },
+  {
+    "test_no": 25,
+    "input_state": {
+      "customer_id": 25,
+      "customer_name": "Todd Alquist",
+      "email_content": "Just looking for some simple canvas shoes. Converse Chuck Taylor, black. Size 10.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [25]
+    }
+  },
+  {
+    "test_no": 26,
+    "input_state": {
+      "customer_id": 26,
+      "customer_name": "Kim Wexler",
+      "email_content": "I need comfortable flats for the office. Black, size 8.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": []
+    }
+  },
+  {
+    "test_no": 27,
+    "input_state": {
+      "customer_id": 27,
+      "customer_name": "Howard Hamlin",
+      "email_content": "Do you stock Brooks Ghost? I need a versatile runner in blue. Size 9.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [46]
+    }
+  },
+  {
+    "test_no": 28,
+    "input_state": {
+      "customer_id": 28,
+      "customer_name": "Nacho Varga",
+      "email_content": "Need some Adidas Ultraboost. Black mesh. Size 11.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [11]
+    }
+  },
+  {
+    "test_no": 29,
+    "input_state": {
+      "customer_id": 29,
+      "customer_name": "Lalo Salamanca",
+      "email_content": "I want the best running shoes you have. Something premium. New Balance 990? Size 11.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [23]
+    }
+  },
+  {
+    "test_no": 30,
+    "input_state": {
+      "customer_id": 30,
+      "customer_name": "Tuco Salamanca",
+      "email_content": "TIGHT! I need those Puma RS-X in blue. Size 9.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [6]
+    }
+  },
+  {
+    "test_no": 31,
+    "input_state": {
+      "customer_id": 31,
+      "customer_name": "Rick Grimes",
+      "email_content": "Need boots for walking. Durable. Timberland, black nubuck. Size 8.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [64]
+    }
+  },
+  {
+    "test_no": 32,
+    "input_state": {
+      "customer_id": 32,
+      "customer_name": "Daryl Dixon",
+      "email_content": "I need something silent and dark. Black canvas Vans. Size 9.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [30]
+    }
+  },
+  {
+    "test_no": 33,
+    "input_state": {
+      "customer_id": 33,
+      "customer_name": "Michonne",
+      "email_content": "Looking for trail shoes. Salomon Speedcross. Blue. Size 10.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [57]
+    }
+  },
+  {
+    "test_no": 34,
+    "input_state": {
+      "customer_id": 34,
+      "customer_name": "Carol Peletier",
+      "email_content": "I need simple grey running shoes. Saucony Ride? Size 8.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [44]
+    }
+  },
+  {
+    "test_no": 35,
+    "input_state": {
+      "customer_id": 35,
+      "customer_name": "Glenn Rhee",
+      "email_content": "Do you have any retro Jordans? Red and black, high tops. Size 10.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [73]
+    }
+  },
+  {
+    "test_no": 36,
+    "input_state": {
+      "customer_id": 36,
+      "customer_name": "Maggie Greene",
+      "email_content": "I need sturdy farm boots. Maybe Dr. Martens? Cherry Red. Size 9.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [66]
+    }
+  },
+  {
+    "test_no": 37,
+    "input_state": {
+      "customer_id": 37,
+      "customer_name": "Negan",
+      "email_content": "I need a leather jacket... and matching shoes. Black leather Reebok Classics. Size 11.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [19]
+    }
+  },
+  {
+    "test_no": 38,
+    "input_state": {
+      "customer_id": 38,
+      "customer_name": "Eugene Porter",
+      "email_content": "I require footwear with optimal energy return. Under Armour HOVR, grey knit. Size 8.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [40]
+    }
+  },
+  {
+    "test_no": 39,
+    "input_state": {
+      "customer_id": 39,
+      "customer_name": "Rosita Espinosa",
+      "email_content": "Looking for something stylish and durable. Puma RS-X, white synthetic. Size 10.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [16]
+    }
+  },
+  {
+    "test_no": 40,
+    "input_state": {
+      "customer_id": 40,
+      "customer_name": "Father Gabriel",
+      "email_content": "I need black shoes for service. Black leather Dr. Martens. Size 11.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [67]
+    }
+  },
+  {
+    "test_no": 41,
+    "input_state": {
+      "customer_id": 41,
+      "customer_name": "Eleven",
+      "email_content": "I want white sneakers. Converse. Size 11.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [27]
+    }
+  },
+  {
+    "test_no": 42,
+    "input_state": {
+      "customer_id": 42,
+      "customer_name": "Mike Wheeler",
+      "email_content": "Do you have any Nikes? Blue leather Air Max. Size 8.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [9]
+    }
+  },
+  {
+    "test_no": 43,
+    "input_state": {
+      "customer_id": 43,
+      "customer_name": "Dustin Henderson",
+      "email_content": "I need cool shoes. Maybe Saucony Ride in orange? Size 11.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [43]
+    }
+  },
+  {
+    "test_no": 44,
+    "input_state": {
+      "customer_id": 44,
+      "customer_name": "Lucas Sinclair",
+      "email_content": "Looking for camo basketball shoes. Size 10.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": []
+    }
+  },
+  {
+    "test_no": 45,
+    "input_state": {
+      "customer_id": 45,
+      "customer_name": "Will Byers",
+      "email_content": "I need simple Vans. Navy canvas. Size 11.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [31]
+    }
+  },
+  {
+    "test_no": 46,
+    "input_state": {
+      "customer_id": 46,
+      "customer_name": "Max Mayfield",
+      "email_content": "I skate. Need durable Vans. Red canvas. Size 8.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [32]
+    }
+  },
+  {
+    "test_no": 47,
+    "input_state": {
+      "customer_id": 47,
+      "customer_name": "Steve Harrington",
+      "email_content": "I need something with good hair... I mean style. Reebok Classic, white leather. Size 9.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [18]
+    }
+  },
+  {
+    "test_no": 48,
+    "input_state": {
+      "customer_id": 48,
+      "customer_name": "Nancy Wheeler",
+      "email_content": "Looking for comfortable walking shoes. Skechers, taupe mesh. Size 8.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [72]
+    }
+  },
+  {
+    "test_no": 49,
+    "input_state": {
+      "customer_id": 49,
+      "customer_name": "Jonathan Byers",
+      "email_content": "I take photos outdoors. Need Dr. Martens, black leather. Size 10.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [65]
+    }
+  },
+  {
+    "test_no": 50,
+    "input_state": {
+      "customer_id": 50,
+      "customer_name": "Jim Hopper",
+      "email_content": "I need boots for work. Timberland, wheat nubuck. Size 10.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [61]
+    }
+  },
+  {
+    "test_no": 51,
+    "input_state": {
+      "customer_id": 51,
+      "customer_name": "Joyce Byers",
+      "email_content": "I'm always running around. Hoka Clifton, grey mesh. Size 8.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [52]
+    }
+  },
+  {
+    "test_no": 52,
+    "input_state": {
+      "customer_id": 52,
+      "customer_name": "Billy Hargrove",
+      "email_content": "I need tough shoes. Leather, black. Maybe New Balance suede? Size 8.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [24]
+    }
+  },
+  {
+    "test_no": 53,
+    "input_state": {
+      "customer_id": 53,
+      "customer_name": "Robin Buckley",
+      "email_content": "I need comfortable shoes for standing all day scooping ice cream. Converse, red canvas. Size 9.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [26]
+    }
+  },
+  {
+    "test_no": 54,
+    "input_state": {
+      "customer_id": 54,
+      "customer_name": "Erica Sinclair",
+      "email_content": "I need pink shoes. Size 8.5. Make it snappy.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [83]
+    }
+  },
+  {
+    "test_no": 55,
+    "input_state": {
+      "customer_id": 55,
+      "customer_name": "Murray Bauman",
+      "email_content": "I need shoes for... stealth. Black mesh. Saucony Ride? Size 9.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [42]
+    }
+  },
+  {
+    "test_no": 56,
+    "input_state": {
+      "customer_id": 56,
+      "customer_name": "Fox Mulder",
+      "email_content": "I want to believe... in comfortable shoes. Brooks Ghost, grey mesh. Size 8.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [48]
+    }
+  },
+  {
+    "test_no": 57,
+    "input_state": {
+      "customer_id": 57,
+      "customer_name": "Dana Scully",
+      "email_content": "I need practical footwear. Skechers, navy mesh. Size 9.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [70]
+    }
+  },
+  {
+    "test_no": 58,
+    "input_state": {
+      "customer_id": 58,
+      "customer_name": "Walter Skinner",
+      "email_content": "I need formal office shoes. Black leather Oxford. Size 11.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": []
+    }
+  },
+  {
+    "test_no": 59,
+    "input_state": {
+      "customer_id": 59,
+      "customer_name": "Cigarette Smoking Man",
+      "email_content": "I need shoes that leave no trace. Black canvas Converse. Size 10.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [29]
+    }
+  },
+  {
+    "test_no": 60,
+    "input_state": {
+      "customer_id": 60,
+      "customer_name": "Frodo Baggins",
+      "email_content": "I usually walk barefoot, but I need something for a long journey to Mordor. Hiking boots. Size 8.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [92]
+    }
+  },
+  {
+    "test_no": 61,
+    "input_state": {
+      "customer_id": 61,
+      "customer_name": "Samwise Gamgee",
+      "email_content": "I need gardening shoes. Crocs? Yellow foam. Size 9.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [95]
+    }
+  },
+  {
+    "test_no": 62,
+    "input_state": {
+      "customer_id": 62,
+      "customer_name": "Gandalf the Grey",
+      "email_content": "A wizard is never late. I need grey suede shoes. New Balance. Size 10.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [21]
+    }
+  },
+  {
+    "test_no": 63,
+    "input_state": {
+      "customer_id": 63,
+      "customer_name": "Aragorn",
+      "email_content": "I need ranger boots. Durable. Merrell, earth color. Size 10.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [89]
+    }
+  },
+  {
+    "test_no": 64,
+    "input_state": {
+      "customer_id": 64,
+      "customer_name": "Legolas",
+      "email_content": "I need light shoes for running on snow. On Running, white mesh. Size 9.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [78]
+    }
+  },
+  {
+    "test_no": 65,
+    "input_state": {
+      "customer_id": 65,
+      "customer_name": "Gimli",
+      "email_content": "I need sturdy boots for the mines! Timberland, black nubuck. Size 8.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [64]
+    }
+  },
+  {
+    "test_no": 66,
+    "input_state": {
+      "customer_id": 66,
+      "customer_name": "Boromir",
+      "email_content": "One does not simply walk without good shoes. Salomon, red synthetic. Size 11.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [55]
+    }
+  },
+  {
+    "test_no": 67,
+    "input_state": {
+      "customer_id": 67,
+      "customer_name": "Gollum",
+      "email_content": "We wants the precious... shoes. Birkenstock. Mocha suede. Size 8.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [88]
+    }
+  },
+  {
+    "test_no": 68,
+    "input_state": {
+      "customer_id": 68,
+      "customer_name": "Sherlock Holmes",
+      "email_content": "I need practical footwear for chasing criminals. Asics Gel-Kayano, grey mesh. Size 11.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [35]
+    }
+  },
+  {
+    "test_no": 69,
+    "input_state": {
+      "customer_id": 69,
+      "customer_name": "John Watson",
+      "email_content": "I need sensible walking shoes. Skechers, black mesh. Size 11.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [71]
+    }
+  },
+  {
+    "test_no": 70,
+    "input_state": {
+      "customer_id": 70,
+      "customer_name": "Moriarty",
+      "email_content": "I need shoes with style. Puma RS-X, red synthetic. Size 9.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [7]
+    }
+  },
+  {
+    "test_no": 71,
+    "input_state": {
+      "customer_id": 71,
+      "customer_name": "James Bond",
+      "email_content": "I need tuxedo shoes. Patent leather. Size 10.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": []
+    }
+  },
+  {
+    "test_no": 72,
+    "input_state": {
+      "customer_id": 72,
+      "customer_name": "Q",
+      "email_content": "I need tech-wear. On Running, navy mesh. Size 11.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [79]
+    }
+  },
+  {
+    "test_no": 73,
+    "input_state": {
+      "customer_id": 73,
+      "customer_name": "M",
+      "email_content": "I need authority. Dr. Martens, white leather. Size 8.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [68]
+    }
+  },
+  {
+    "test_no": 74,
+    "input_state": {
+      "customer_id": 74,
+      "customer_name": "Harry Potter",
+      "email_content": "I need shoes for Quidditch. Adidas Ultraboost, white mesh. Size 8.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [12]
+    }
+  },
+  {
+    "test_no": 75,
+    "input_state": {
+      "customer_id": 75,
+      "customer_name": "Hermione Granger",
+      "email_content": "I need practical school shoes. Reebok Classic, grey leather. Size 8.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [20]
+    }
+  },
+  {
+    "test_no": 76,
+    "input_state": {
+      "customer_id": 76,
+      "customer_name": "Ron Weasley",
+      "email_content": "My mom bought me these maroon sweaters. I need matching shoes. Converse, maroon canvas? Size 10.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": []
+    }
+  },
+  {
+    "test_no": 77,
+    "input_state": {
+      "customer_id": 77,
+      "customer_name": "Draco Malfoy",
+      "email_content": "My father will hear about this if I don't get premium shoes. New Balance 990, navy suede. Size 11.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [23]
+    }
+  },
+  {
+    "test_no": 78,
+    "input_state": {
+      "customer_id": 78,
+      "customer_name": "Hagrid",
+      "email_content": "I need giant boots. Size 18.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": []
+    }
+  },
+  {
+    "test_no": 79,
+    "input_state": {
+      "customer_id": 79,
+      "customer_name": "Dumbledore",
+      "email_content": "I fancy a pair of comfy sandals. Birkenstock, taupe suede. Size 11.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [87]
+    }
+  },
+  {
+    "test_no": 80,
+    "input_state": {
+      "customer_id": 80,
+      "customer_name": "Snape",
+      "email_content": "Always... black. Adidas Ultraboost, black mesh. Size 9.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [4]
+    }
+  },
+  {
+    "test_no": 81,
+    "input_state": {
+      "customer_id": 81,
+      "customer_name": "Luke Skywalker",
+      "email_content": "I need shoes for desert planets. Merrell, granite. Size 9.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [91]
+    }
+  },
+  {
+    "test_no": 82,
+    "input_state": {
+      "customer_id": 82,
+      "customer_name": "Leia Organa",
+      "email_content": "I need boots for rebellion. Timberland, wheat nubuck. Size 8.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": []
+    }
+  },
+  {
+    "test_no": 83,
+    "input_state": {
+      "customer_id": 83,
+      "customer_name": "Han Solo",
+      "email_content": "I need boots for smuggling. Timberland, black nubuck. Size 11.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [62]
+    }
+  },
+  {
+    "test_no": 84,
+    "input_state": {
+      "customer_id": 84,
+      "customer_name": "Chewbacca",
+      "email_content": "RRRAARRGGHGH! (I think he wants Birkenstocks, brown suede. Size 10).",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [85]
+    }
+  },
+  {
+    "test_no": 85,
+    "input_state": {
+      "customer_id": 85,
+      "customer_name": "Darth Vader",
+      "email_content": "I find your lack of black shoes disturbing. Nike Air Max, red leather? No, I want black. Do you have black Air Max in 11?",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": []
+    }
+  },
+  {
+    "test_no": 86,
+    "input_state": {
+      "customer_id": 86,
+      "customer_name": "Yoda",
+      "email_content": "Green Crocs, I seek. Size 10, they must be.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [93]
+    }
+  },
+  {
+    "test_no": 87,
+    "input_state": {
+      "customer_id": 87,
+      "customer_name": "Obi-Wan Kenobi",
+      "email_content": "Hello there. I need civilized footwear. Birkenstock, black leather. Size 9.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [86]
+    }
+  },
+  {
+    "test_no": 88,
+    "input_state": {
+      "customer_id": 88,
+      "customer_name": "Mace Windu",
+      "email_content": "I need purple shoes. Size 11.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": []
+    }
+  },
+  {
+    "test_no": 89,
+    "input_state": {
+      "customer_id": 89,
+      "customer_name": "Padme Amidala",
+      "email_content": "I need white boots for the arena. Fila, white synthetic. Size 9.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [82]
+    }
+  },
+  {
+    "test_no": 90,
+    "input_state": {
+      "customer_id": 90,
+      "customer_name": "Anakin Skywalker",
+      "email_content": "I don't like sand. I need shoes that keep sand out. Merrell, walnut. Size 11.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [90]
+    }
+  },
+  {
+    "test_no": 91,
+    "input_state": {
+      "customer_id": 91,
+      "customer_name": "Jack Sparrow",
+      "email_content": "But why is the rum gone? I need boots for a pirate. Dr. Martens, grey leather? Size 10.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [69]
+    }
+  },
+  {
+    "test_no": 92,
+    "input_state": {
+      "customer_id": 92,
+      "customer_name": "Will Turner",
+      "email_content": "I need shoes for blacksmithing. Timberland, wheat nubuck. Size 9.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [63]
+    }
+  },
+  {
+    "test_no": 93,
+    "input_state": {
+      "customer_id": 93,
+      "customer_name": "Elizabeth Swann",
+      "email_content": "I need corsets and... running shoes? Mizuno Wave Rider, orange mesh. Size 8.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [60]
+    }
+  },
+  {
+    "test_no": 94,
+    "input_state": {
+      "customer_id": 94,
+      "customer_name": "Barbossa",
+      "email_content": "I need boots. Black. Timberland. Size 8.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [64]
+    }
+  },
+  {
+    "test_no": 95,
+    "input_state": {
+      "customer_id": 95,
+      "customer_name": "Davy Jones",
+      "email_content": "Do you have shoes for tentacles? I need water friendly. Crocs, navy foam. Size 8.5.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [96]
+    }
+  },
+  {
+    "test_no": 96,
+    "input_state": {
+      "customer_id": 96,
+      "customer_name": "Marty McFly",
+      "email_content": "I need self-lacing shoes. Or at least Nike Air Max. Red leather. Size 10.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [1]
+    }
+  },
+  {
+    "test_no": 97,
+    "input_state": {
+      "customer_id": 97,
+      "customer_name": "Doc Brown",
+      "email_content": "Great Scott! I need running shoes. Brooks Ghost, white mesh. Size 11.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [47]
+    }
+  },
+  {
+    "test_no": 98,
+    "input_state": {
+      "customer_id": 98,
+      "customer_name": "Biff Tannen",
+      "email_content": "Make like a tree and get me some boots. Timberland, black. Size 11.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [62]
+    }
+  },
+  {
+    "test_no": 99,
+    "input_state": {
+      "customer_id": 99,
+      "customer_name": "Neo",
+      "email_content": "I need shoes for the Matrix. Black canvas Vans. Size 10.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [29]
+    }
+  },
+  {
+    "test_no": 100,
+    "input_state": {
+      "customer_id": 100,
+      "customer_name": "Morpheus",
+      "email_content": "Blue pill or red pill? I'll take the blue shoes. Puma RS-X, blue synthetic. Size 11.",
+      "case_memory": null,
+      "closest_product_sql_query": "SELECT * FROM shoe_characteristics;"
+    },
+    "expected": {
+      "product_ids": [14]
+    }
+  }
+]

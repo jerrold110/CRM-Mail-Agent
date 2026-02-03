@@ -1,6 +1,6 @@
 # **Agent evaluation framework**
 
-This document outlines the approach to evaluating the CRM email agent system by describing the functional aspects of the agentic system that require evaluation, how they will be evluated, and the offline evaluation methodology.
+This document outlines the approach to evaluating the CRM email agent system by describing evaluation approach, the functions of the agentic system that will undergo evaluation, how they will be evaluated
 
 # Evaluation methodology
 Construct evaluation set that defines input state and expected outcome. 
@@ -13,14 +13,16 @@ Write functions to read from a structured evaluation set to test tools/planning/
 Load all rows into internal database (Postgres). Instead of loading rows per evaluation which would cause evaluation to be unwieldy
 Per each evaluation, load accompanying agent memory, run test, remove memory: 
 
-# What to evaluate
+# What functions of the system to evaluate
+The langGraph agent is made up of nodes that use state to contain input state. Each node can be evaluated in isolation, and segments of the graph composed of several nodes/edges can be evaluated as an individual system.
+
 **Tool evaluation**
 - classify_email with memory
     - Classification
     - Urgency
 - get_comprehensive_product_query
     - Converts product email into sql query for single or multiple products. If email question cannot be understood, returns CANNOT_ANSWER
-- find_closest_product
+- match_closest_product
     - matches database output from SQL query output with customer query to identify matching product(s)
 - get_product_availability
     - Deterministic tool, checks company table for a product_id, if none, checks incoming_deliveries table
@@ -50,8 +52,10 @@ Urgency
 ## get_comprehensive_product_query
 This is an llm invocation. Use an LLM-judge to return a score of 0-1
 
-## find_closest_product
+## match_closest_product
 This input state is an email product query and a string that represents tabular output from a database. The LLM extracts the matching product IDs and outputs a list of product ids that match the query. Measure with Precision/Recall
+
+Since SQL query accuracy is not an evaluation criteria of this function, this test will use a standard database output (the entire database) which with to recommend from based on the customer's input query. This does not deteriorate the quality of the system's capacity to make precise recommendations, but rather increases it because there are more opportunities for errors.
 
 ## get_product_availability
 This is a deterministic function, input is simply data in SQL and the output is a string. Measure with Accuracy to see if strings are correct.

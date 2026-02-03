@@ -244,4 +244,6 @@ if __name__ == "__main__":
     #print(x)
     #print(asyncio.run(late_delivery_last60d(param)))
     #print(asyncio.run(get_unique_list('material')))
-    print(asyncio.run(get_shoe_characteristics()))
+
+    q = "SELECT * FROM shoe_characteristics\nLIMIT 500;"
+    print(asyncio.run(get_query_shoe_characteristics(q)))
