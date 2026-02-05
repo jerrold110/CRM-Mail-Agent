@@ -7,8 +7,14 @@ import uuid
 from _agent_memory_crud import update_customer_support_history, read_customer_support_history, delete_customer_support_history
 
 # https://langfuse.com/guides/cookbook/example_langgraph_agents#step-3-observe-and-evaluate-a-more-complex-agent
+"""
+In Langfuse Observability is structured into three components: sessions, traces, and observations.
+Observations have types, trces represent a single request of operations, sessions are used to group traces within the same user interaction
+https://langfuse.com/docs/observability/data-model#adding-attributes
 
+Langfuse is built on OpenTelemetery. Langfuse sends traces asynchronously in batche through a background exporter that runs continuously and flushes batches on its own. This allows it to work well for long-running applications like AI agents.
 
+"""
 
 def invoke_agent_langfuse(customer_id: int, customer_name: str, case_id: int, email_content: str, job_id: str):
     """
@@ -20,6 +26,8 @@ def invoke_agent_langfuse(customer_id: int, customer_name: str, case_id: int, em
     """
 
     # Langfuse
+    # Group trace by customer_id and job_id
+    # ENV variables loaded in email_agent.py for authentication and tracing environment (dev, sit, uat...)
     ###########################################################################################
     langfuse = get_client()
     if langfuse.auth_check():
@@ -31,8 +39,15 @@ def invoke_agent_langfuse(customer_id: int, customer_name: str, case_id: int, em
     ###########################################################################################
     
     config = {
-                "configurable": {"thread_id": str(job_id)},
-                "callbacks": [langfuse_handler]
+                "configurable": {"thread_id": str(case_id)},        # Thread ID is case_id to maintain context across job runs
+                "callbacks": [langfuse_handler],
+                "metadata" : {                                      # Metadata for trace grouping. You can use keywords langfuse_user_id, langfuse_session_id, langfuse_tags
+                    "langfuse_user_id": str(customer_id), 
+                    "langfuse_session_id": str(job_id),
+                    "case_id": str(case_id),
+                    "job_id": str(job_id),
+                    "agent_version": "0.0.1",
+                }
              }
     
     initial_state = {
@@ -58,7 +73,7 @@ def invoke_agent(customer_id: int, customer_name: str, case_id: int, email_conte
     """
     
     config = {"configurable": 
-                {"thread_id": str(job_id)}
+                {"thread_id": str(case_id)}
              }
     initial_state = {
         'send_backend': False,
@@ -142,6 +157,15 @@ if __name__ == "__main__":
         Regards,
         Michael
         """
+    
+    random_email = """
+    Hello,
+
+    We are looking to purchase shoes for our sprinting team. Could you provide information on the types of shoes you have available for sprinters?
+
+    Thank you,
+    Michael 
+    """
 
     delete_customer_support_history(4000, 4000)
 
@@ -149,7 +173,7 @@ if __name__ == "__main__":
 
     num = 4000
 
-    eval_output = invoke_agent(num, "Michael", num, product_availability_email, job_id)
+    eval_output = invoke_agent_langfuse(num, "Michael", num, other_email, job_id)
 
     print('==========================================')
     print(eval_output)
