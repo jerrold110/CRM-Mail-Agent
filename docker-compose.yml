@@ -1,0 +1,21 @@
+# docker-compose up --build -d
+services:
+  redis_broker:
+    build: ./backend/BrokerRedis
+    container_name: dc_redis_broker
+    ports:
+      - "6379:6379"
+  redis_commander:
+    build: ./backend/BrokerRedisCommander
+    container_name: dc_redis_commander
+    environment:
+      - REDIS_HOSTS=local:dc_redis_broker:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis_broker
+  internal_database_sql:
+    build: ./backend/InternalDatabaseSQL
+    container_name: dc_internal_database
+    ports:
+      - "5432:5432"

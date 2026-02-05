@@ -1,0 +1,4 @@
+FROM redis:8.4-bookworm
+
+# Port for application inside container to listen on, still need to map to host port when running container
+EXPOSE 6379

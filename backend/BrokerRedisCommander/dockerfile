@@ -1,0 +1,4 @@
+FROM rediscommander/redis-commander:latest
+
+# Port for application inside container to listen on, still need to map to host port when running container
+EXPOSE 8081
