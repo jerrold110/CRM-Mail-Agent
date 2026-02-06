@@ -19,3 +19,14 @@ services:
     container_name: dc_internal_database
     ports:
       - "5432:5432"
+  # Remember to change the database config host address to the service name dc_internal_database_sql
+  agent_service_w_queue:
+    build: ./agent
+    container_name: dc_agent_service_w_queue
+    ports:
+      - "80:80"
+    depends_on:
+      - redis_broker
+      - redis_commander
+      - internal_database_sql
+    
