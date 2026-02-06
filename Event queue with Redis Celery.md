@@ -14,8 +14,29 @@ https://docs.celeryq.dev/en/stable/getting-started/backends-and-brokers/index.ht
 Run celery worker server:
 $ celery -A tasks worker --loglevel=INFO -P eventlet
 
+First steps: https://docs.celeryq.dev/en/stable/getting-started/first-steps-with-celery.html
 
-# Monitoring and maangement
+Next steps: https://docs.celeryq.dev/en/stable/getting-started/next-steps.html
+
+User Guide: https://docs.celeryq.dev/en/stable/userguide/index.html
+
+
+# Monitoring and mangement
 https://docs.celeryq.dev/en/stable/userguide/monitoring.html#monitoring-redis-queues
+
 The number of tasks in a queue can be seen with redis-cli -h HOST -p PORT -n DATABASE_NUMBER llen QUEUE_NAME
+
+
 Further more I am using Redis commander which is a redis management tool written with node.js https://github.com/joeferner/redis-commander
+
+# Routing 
+Options for routing tasks to different queues, adding queues to the celery app, and specifying workers to confume from specific queues.
+
+https://docs.celeryq.dev/en/stable/getting-started/next-steps.html#routing
+
+
+# Workers Guide
+Workers in production are more complex
+
+https://docs.celeryq.dev/en/stable/getting-started/first-steps-with-celery.html#running-the-celery-worker-server
+https://docs.celeryq.dev/en/main/userguide/workers.html
