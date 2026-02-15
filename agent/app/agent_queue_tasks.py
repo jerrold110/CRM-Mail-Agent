@@ -36,7 +36,8 @@ class BaseTaskWithRetry(Task):
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         print(f"Task {task_id} failed: {exc} after {self.max_retries} retries")
-        # Send message to backend that task has failed after retries
+
+        # Send message to backend through broker that agent task has failed after all retries and include error message.
 
 @app.task(name='dummy_task',
           base=BaseTaskWithRetry,

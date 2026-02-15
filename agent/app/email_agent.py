@@ -455,7 +455,8 @@ def send_response_to_backend(state: EmailAgentState) -> dict:
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.types import RetryPolicy
 import uuid
-from asyncpg.exceptions import PostgresSyntaxError, PostgresConnectionError, PostgresIOError
+from psycopg import OperationalError, InterfaceError
+from psycopg.errors import SyntaxError
 from openai import RateLimitError, APIConnectionError, BadRequestError
 
 workflow = StateGraph(EmailAgentState)
@@ -470,9 +471,9 @@ all_retrypolicy = RetryPolicy(
     retry_on=[
         ConnectionRefusedError, 
         ConnectionError, 
-        PostgresSyntaxError, 
-        PostgresConnectionError, 
-        PostgresIOError,
+        SyntaxError, 
+        OperationalError, 
+        InterfaceError,
         RateLimitError,
         APIConnectionError,
         BadRequestError

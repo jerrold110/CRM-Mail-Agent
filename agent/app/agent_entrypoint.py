@@ -8,8 +8,10 @@ from _agent_memory_crud import delete_customer_support_history
 
 # https://langfuse.com/guides/cookbook/example_langgraph_agents#step-3-observe-and-evaluate-a-more-complex-agent
 """
+This file adds observability to the agent workflow using Langfuse. It defines a CallbackHandler that sends trace data to Langfuse, and modifies the agent invocation function to include this handler in the configuration.
+
 In Langfuse Observability is structured into three components: sessions, traces, and observations.
-Observations have types, trces represent a single request of operations, sessions are used to group traces within the same user interaction
+Observations have types, traces represent a single request of operations, sessions are used to group traces within the same user interaction
 https://langfuse.com/docs/observability/data-model#adding-attributes
 
 Langfuse is built on OpenTelemetery. Langfuse sends traces asynchronously in batche through a background exporter that runs continuously and flushes batches on its own. This allows it to work well for long-running applications like AI agents.
@@ -46,7 +48,7 @@ def invoke_agent_langfuse(customer_id: int, customer_name: str, case_id: int, em
                     "langfuse_session_id": str(job_id),
                     "case_id": str(case_id),
                     "job_id": str(job_id),
-                    "agent_version": "0.0.1",
+                    "agent_version": "0.0.6",
                 }
              }
     
