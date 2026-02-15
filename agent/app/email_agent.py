@@ -9,7 +9,7 @@ from langgraph.graph import StateGraph, START, END
 from langgraph.types import interrupt, Command, RetryPolicy
 from langchain_openai import ChatOpenAI
 from langchain.messages import HumanMessage, SystemMessage, AIMessage, ToolMessage
-import asyncio
+#import asyncio  # not using async db read tools anymore
 
 # Graph State imports
 from _state import EmailCharacteristics, EmailAgentState, DeliveryInfo
@@ -157,7 +157,7 @@ def check_deliveries(state: EmailAgentState):
     - If there are matches, check for deliveries that 
     """
 
-    open_deliveries = asyncio.run(get_customer_open_deliveries(state.customer_id))
+    open_deliveries = get_customer_open_deliveries(state.customer_id)
     # Match open_deliveries with information extracted from email
     matches = []
     for d in open_deliveries:
@@ -174,7 +174,7 @@ def check_deliveries(state: EmailAgentState):
             goto = "write_response"
         )
 
-    present_date = asyncio.run(get_current_date())
+    present_date = get_current_date()
     # Credit refunds and coupons
     new_context = []
     new_actions = []
@@ -199,8 +199,8 @@ def check_deliveries(state: EmailAgentState):
 
             # Create coupon if 
             # - There was a late closed delivery in the last 60 days
-            ldl = asyncio.run(late_delivery_last60d(state.customer_id))
-            icr = asyncio.run(is_coupon_redeemed(state.customer_id, delivery_id))
+            ldl = late_delivery_last60d(state.customer_id)
+            icr = is_coupon_redeemed(state.customer_id, delivery_id)
             if ldl and not icr:
                 new_context.append(f"Delivery id {delivery_id} and tracking number {tracking_number} is late and there was another late delivery within the last 60 days. A coupon for expedited delivery is created and offered to the customer which can be used on the next order.")
                 new_actions.append({"Action": "Create_coupon", "params": {"delivery_id": str(delivery_id), "customer_id": str(state.customer_id)}})
@@ -292,9 +292,9 @@ def match_closest_product(state: EmailAgentState) -> Command[Literal["check_inve
 
     # Check without filters. THIS IS A BAD OPTION BUT ALLOWS GRACEFUL HANDLING
     if sql_query == 'CANNOT_ANSWER':
-        product_characteristics = asyncio.run(get_shoe_characteristics())
+        product_characteristics = get_shoe_characteristics()
     else:
-        product_characteristics = asyncio.run(get_query_shoe_characteristics(sql_query))
+        product_characteristics = get_query_shoe_characteristics(sql_query)
 
     if product_characteristics == "No results":
         response = "There are no products in the inventory that match the customer's inquiry."
@@ -539,6 +539,6 @@ def invoke_agent(initial_state:dict, job_id:str):
 
 
 # ======= Test the agent ==========
-print("Agent Version: 0.0.5")
+print("Agent Version: 0.0.6")
 
     

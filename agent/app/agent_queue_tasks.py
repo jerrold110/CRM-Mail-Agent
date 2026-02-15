@@ -10,6 +10,9 @@ from celery import Celery, Task
 from agent_entrypoint import invoke_agent_langfuse, invoke_agent
 from time import sleep
 
+"""This is important to import the db read tools here to ensure the connection pool is initialized in the worker process. Celery creates separate worker processes, and each process needs to have its own database connection pool. _pool is initialized at the module level and it is shared across all tasks in the same worker process. This design ensures that each worker process maintains its own connection pool, which is important for avoiding issues with shared state across processes."""
+import _db_read_tools
+
 app = Celery(main='agent_queue_tasks')                       # main has to be the name of the module
 
 # Load configuration from celeryconfig.py

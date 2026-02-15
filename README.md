@@ -28,3 +28,7 @@ This diagram shows how the agent's memory is updated and accessed at each stage 
 
 ## Python frameworks
 ![System diagram](images/pythonLibraries.png "Optional title")
+
+### To do
+Database pooling https://magicstack.github.io/asyncpg/current/usage.html#connection-pools
+
