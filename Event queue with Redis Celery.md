@@ -11,8 +11,13 @@ Why Redis is the choice of broker (works well for rapid transport of small messa
 https://docs.celeryq.dev/en/stable/getting-started/backends-and-brokers/index.html#redis
 
 # Quick use
-Run celery worker server:
-$ celery -A tasks worker --loglevel=INFO -P eventlet
+Run celery worker server.
+
+celery -A agent_queue_tasks worker --loglevel=info --pool=threads (single thread)
+celery -A agent_queue_tasks worker --loglevel=info --pool=threads (multi-thread)
+
+python agent_queue_tasks_worker
+
 
 First steps: https://docs.celeryq.dev/en/stable/getting-started/first-steps-with-celery.html
 

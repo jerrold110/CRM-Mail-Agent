@@ -13,7 +13,7 @@ result_expires = 600
 # Rate limit example: limit to 100 tasks per minute
 #task_default_rate_limit = '1/m' 
 task_annotations = {
-    'some_process': {'rate_limit': '100/m'},
+    'dummy_process': {'rate_limit': '100/m'},
     'invoke_agent_celery_task': {'rate_limit': '100/m'},
     'invoke_agent_langfuse_celery_task': {'rate_limit': '100/m'}
 }

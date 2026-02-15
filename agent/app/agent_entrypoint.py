@@ -4,7 +4,7 @@ from langfuse.langchain import CallbackHandler
 from email_agent import app
 import uuid
 
-from _agent_memory_crud import update_customer_support_history, read_customer_support_history, delete_customer_support_history
+from _agent_memory_crud import delete_customer_support_history
 
 # https://langfuse.com/guides/cookbook/example_langgraph_agents#step-3-observe-and-evaluate-a-more-complex-agent
 """
@@ -173,7 +173,7 @@ if __name__ == "__main__":
 
     num = 4000
 
-    eval_output = invoke_agent(num, "Michael", num, other_email, job_id)
+    eval_output = invoke_agent(num, "Michael", num, product_availability_email, job_id)
 
     print('==========================================')
     print(eval_output)

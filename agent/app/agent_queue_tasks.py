@@ -20,6 +20,7 @@ app = Celery(main='agent_queue_tasks')                       # main has to be th
 app.config_from_object('celeryconfig')
 
 # the on_failure method isn't working very well, needs debugging and extensive study of celery docs https://docs.celeryq.dev/en/main/userguide/tasks.html#task-states
+# https://docs.celeryq.dev/en/main/userguide/tasks.html#retrying
 class BaseTaskWithRetry(Task):
     max_retries = 2
     retry_backoff = True
@@ -42,40 +43,60 @@ class BaseTaskWithRetry(Task):
           ignore_result=True,
           bind=True,
           time_limit=3600)
-def dummy_task():
-    for i in range(3):
-        print(f"Dummy task iteration: {i}")
-        sleep(1)
+def dummy_task(self):
+    try:
+        for i in range(3):
+            print(f"Dummy task iteration: {i}")
+            sleep(1)
+    except Exception as exc:
+        raise self.retry(exc=exc)
 
 @app.task(name='invoke_agent_langfuse_celery_task',
           base=BaseTaskWithRetry,
           ignore_result=True,
           bind=True,
           time_limit=3600)
-def invoke_agent_langfuse_celery_task(customer_id: int, 
-                               customer_name: str, 
-                               case_id: int, 
-                               email_content: str, 
-                               job_id: str):
-    invoke_agent_langfuse(customer_id, customer_name, case_id, email_content, job_id)
+def invoke_agent_langfuse_celery_task(self,
+                                      customer_id: int,
+                                      customer_name: str, 
+                                      case_id: int, 
+                                      email_content: str, 
+                                      job_id: str):
+    try:
+        invoke_agent_langfuse(customer_id, customer_name, case_id, email_content, job_id)
+    except Exception as exc:
+        raise self.retry(exc=exc)
 
 @app.task(name='invoke_agent_celery_task',
           base=BaseTaskWithRetry,
           ignore_result=True,
           bind=True,
           time_limit=3600)
-def invoke_agent_celery_task(customer_id: int, 
-                    customer_name: str, 
-                    case_id: int, 
-                    email_content: str, 
-                    job_id: str):
-    invoke_agent(customer_id, customer_name, case_id, email_content, job_id)
+def invoke_agent_celery_task(self,
+                             customer_id: int, 
+                             customer_name: str,
+                             case_id: int,
+                             email_content: str,
+                             job_id: str):
+    try:
+        invoke_agent(customer_id, customer_name, case_id, email_content, job_id)
+    except Exception as exc:
+        raise self.retry(exc=exc)
 
 """
 Using celery:
 
 https://docs.celeryq.dev/en/stable/getting-started/first-steps-with-celery.html#calling-the-task
 
-foo.delay(3, 4)  Call the task asynchronously
+dummy_task.delay()  Call the task asynchronously
 
 """
+if __name__ == "__main__":
+
+    product_availability_email = """
+        Do you carry any boots suitable for hiking? I need something durable in a size 8.5
+    """
+
+    invoke_agent_langfuse_celery_task.delay(4000, "Michael", 4000, product_availability_email, "job_12345")
+    #dummy_task.delay()
+    #print("task invoked, now the worker will pick it up and execute asynchronously")
