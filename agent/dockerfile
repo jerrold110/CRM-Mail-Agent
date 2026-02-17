@@ -12,7 +12,7 @@ COPY ./entrypoint.sh /code/entrypoint.sh
 RUN chmod +x /code/entrypoint.sh
 
 EXPOSE 8000
-
+# have to use a shell script to run python file so that script runs during container startup and not during build time
 CMD ["sh", "/code/entrypoint.sh"]
 
 #RUN python app/memory_setup.py

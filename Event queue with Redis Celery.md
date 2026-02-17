@@ -11,13 +11,17 @@ Why Redis is the choice of broker (works well for rapid transport of small messa
 https://docs.celeryq.dev/en/stable/getting-started/backends-and-brokers/index.html#redis
 
 # Quick use
-Run celery worker server.
-
+## Run celery worker server.
 celery -A agent_queue_tasks worker --loglevel=info --pool=threads (single thread)
+
 celery -A agent_queue_tasks worker --loglevel=info --pool=threads (multi-thread)
 
 python agent_queue_tasks_worker
 
+## Run multiple workers
+celery -A proj worker --loglevel=INFO --concurrency=10 -n worker1@%h
+
+celery -A proj worker --loglevel=INFO --concurrency=10 -n worker2@%h
 
 First steps: https://docs.celeryq.dev/en/stable/getting-started/first-steps-with-celery.html
 
@@ -32,7 +36,7 @@ https://docs.celeryq.dev/en/stable/userguide/monitoring.html#monitoring-redis-qu
 The number of tasks in a queue can be seen with redis-cli -h HOST -p PORT -n DATABASE_NUMBER llen QUEUE_NAME
 
 
-Further more I am using Redis commander which is a redis management tool written with node.js https://github.com/joeferner/redis-commander
+Furthermore I am using Redis commander which is a redis management tool written with node.js https://github.com/joeferner/redis-commander
 
 # Routing 
 Options for routing tasks to different queues, adding queues to the celery app, and specifying workers to confume from specific queues.

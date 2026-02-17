@@ -175,7 +175,7 @@ if __name__ == "__main__":
 
     num = 4000
 
-    eval_output = invoke_agent(num, "Michael", num, product_availability_email, job_id)
+    eval_output = invoke_agent_langfuse(num, "Michael", num, product_availability_email, job_id)
 
     print('==========================================')
     print(eval_output)
