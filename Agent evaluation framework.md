@@ -3,7 +3,7 @@
     font-size: 16px;
   }
 </style>
-
+Disclaimer: AI was not used to write this readme file
 # **Agent evaluation**
 Evaluating Agentic systems is a cruicial step in agent development necessary to determine if a system meets its intended goals and can handle the complexities of real-world function, without which we would just be working in the dark with no idea of how well it performs. Similar to evaluating machine learning models and traditional software systems, we have to define clear and relevant metrics for evaluating Agents that allow us to measure its performance. Quantitative metrics include accuracy, precision, recall, latency, Rouge, BLEU, and BertScore, and LLM-judge scores. Qualitative measures can be used to measure aspects difficult to quantify quantitatively such as user-satisfaction. This project will focus on quantitative metrics since they can be automated.
 

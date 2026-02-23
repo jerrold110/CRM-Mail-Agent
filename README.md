@@ -3,6 +3,7 @@
     font-size: 16px;
   }
 </style>
+Disclaimer: AI was not used to write this readme file
 
 # **CRM-Mail-Agent technical documentation**
 ## Introduction
