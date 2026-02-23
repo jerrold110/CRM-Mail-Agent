@@ -19,12 +19,13 @@ Under component evaluation, we can evaluating tools, memory, and planning with s
 Under holistic evaluation, we want to test the agentic system as a whole ensuring that all components are working together seamlessly. This is similar to integration testing. We want to define test cases that involve the entire stack of the agentic system: such as multi-turn conversations that involve interpreting user intent, planning, and tool calls. Consistency ensures that the agent's inputs are aligned with its inputs over diverse scenarios, extended exchanges, and repeated testing. Hallucination is revelant because this Agent system stores observations gathered throughout the lifespan of its workflow in its state under the "context" attribute, and uses these observations to generate an email response. 
 
 ## Evaluation approach
-Construct evaluation set that define input state and expected output states with json format evaluation sets. This format allows us to test several things at once in a single example and scales well for multivarious evaluations. In an enterprise, domain experts will be widely utilised to create and manage high quality evaluation sets. AI can be used to mimic and generate more evaluation examples with modifications based on the initial ones provided by experts.
+The first step is to decide on a structured, and scalable format to define the evaluation sets that define input state and expected output states. According to Miahael Albada in 'Building Applications with AI Agents', he recommends the json format to create evaluation sets. This format is highly nested and allows us to test several things at once in a single example and scales well for multivarious evaluations, examples provided in `agent/evaluation`. In an enterprise, domain experts will be widely utilised to create and manage high quality evaluation sets. AI can be used to mimic and generate more evaluation examples with modifications based on the initial ones provided by experts.
 - LLM mutatations to introduce ambiguity/inject rare idioms/mutate working examples. 
 - Use LLM to generate distributional interpolation (e.g., Blend two intents to create an ambiguous request).
 
 In this project, I have followed the same approach of manually defining a few examples and using AI to generate a large number of variations making up the majority of the data in the evaluation sets. Based on the output from the agent, we can compare it with the expected output in the evaluation sets and calculate quantitative metrics to understand the system's performance. I have written a simple framework with python to makes these comparisons and calculate the metrics in `/agent/evaluation` using python files, json files, and jupyter notebooks.
 
+### Loading data for tests
 Data systems include the internal database and the agent's memory (Postgresql database). Loading the rows of data for the internal database per evaluation test case would cause unwieldy due to the amount of data that as to be added, so the entirety of  this data will be loaded beforehand. Memory data will be loaded per evaluation, and removed after the test is complete due to its smaller size (Agent memory only consists of conversation history in the current state of this agent, but can easily be extended for the development of future platform features such as personalisation and grievance handling).
 
 # Evaluating at the component and holistic level
@@ -48,13 +49,11 @@ The langGraph agent is made up of nodes that use state to contain input state. E
     - generates an email response based on context, email_classification, and email
 
 **Planning evaluation**
-
 - check_inventory_llm_call
     - Plans what tool calls (get_product_availability) to make and what parameters
     - Not very useful in this project as there is only one tool to call. More beneficial for projects with multiple tools at once decision point.
 
 **End-to-end scenario evaluation**
-
 This involves testing across the entire stack of the agent's workflow: **Node input/output, tool invocation/input/output, state messages/context/actions, memory configurations**.
 - What nodes were traversed in the graph?
 - Tool invocations (without considering input and output)
@@ -108,6 +107,3 @@ The email that has been generated will be compared against a model email that ta
 
 ## check_inventory_llm_call
 This is an llm invocation planner that decides what tools to call and what parameters to call them with.
-
-## Holistic evaluation
-Evaluating the system holistically for a single test case involves a representative workflow in JSON similar to the other test cases.
