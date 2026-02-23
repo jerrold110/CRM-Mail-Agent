@@ -131,8 +131,9 @@ Security in agentic systems is an essential area of focus. Due to the non-determ
 This is when unauthorised data or large amounts of non-sensitive data (that they become sensitive) is released to customers. Either by intentional data security attacks by the customer, or by accident by the system
 
 ### Late delivery complaint workflow:
-- Database read results are filtered on the customer's ID at the application level so LLM will never see data that does not belong to the client attached to the case it is handling to prevent data leakage or customer attacks
-Product recummendation/availability workflow:
+- Database read results are filtered on the customer's ID at the application level so LLM will never see data that does not belong to the client attached to the case it is handling to prevent data leakage or customers trying to steal data
+
+### Product availability inquiry or product recommendation request:
 - System returns a maximum of 500 database results (adjustable) in case a customer is attempting a data leak attack to obtain inventory of all items (e,g,: "I want to find out about the available stocks of all your shoes"). Repeated requests are flagged by the agent
 - More than 3 repeated emails by the customer over a similar topic (i,e,: Inquires about the availability of every brand and size across multiple emails to get data on the entire inventory of shoes) is automatically routed to human escalation
 
@@ -143,6 +144,7 @@ Product recummendation/availability workflow:
 This is when a customer attempts to send malicious instructions or pretends to be the owner of an important role (such as system) to hijack the agent
 ### Classification workflow:
 - Unclear/urgent/mixed-request (edge cases) emails are routed to human for evaluation and not included in the rest of the agent workflow (refer to prompt in email_agent.py)
+- All actions and responses require approval by a qualified customer service staff member before execution
 
 ## **Denial of service:**
 This is when the customer attempts to send multiple emails or extremely long emails with complicated instructions to consume system resources and disrupt system operation.
