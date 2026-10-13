@@ -1,65 +1,104 @@
-import os
-from dotenv import load_dotenv
-load_dotenv()
+"""Customer support LangGraph workflow.
 
-from typing import TypedDict, Literal, Annotated
+PostgreSQL connection pools, checkpointing resources and long-term memory
+are managed by _agent_memory_crud.py. This module defines the agent workflow,
+compiles it lazily, and never opens database connections or runs migrations.
+Environment variables come from Docker Compose or Kubernetes.
+"""
 
-# Define the Nodes of the agent
+import logging
+import threading
+from typing import Literal
+
 from langgraph.graph import StateGraph, START, END
-from langgraph.types import interrupt, Command, RetryPolicy
+from langgraph.types import Command, RetryPolicy
 from langchain_openai import ChatOpenAI
 from langchain.messages import HumanMessage, SystemMessage, AIMessage, ToolMessage
-#import asyncio  # not using async db read tools anymore
+from psycopg import OperationalError, InterfaceError
+from psycopg.errors import SyntaxError as PostgresSyntaxError
+from openai import RateLimitError, APIConnectionError, BadRequestError
 
 # Graph State imports
 from _state import EmailCharacteristics, EmailAgentState, DeliveryInfo
 
 # Import tools
-from _db_read_tools import get_unique_list, get_shoe_characteristics, get_query_shoe_characteristics, get_product_availability, get_customer_open_deliveries, get_current_date, is_coupon_redeemed, late_delivery_last60d
+from _db_read_tools import (
+    get_unique_list,
+    get_shoe_characteristics,
+    get_query_shoe_characteristics,
+    get_product_availability,
+    get_customer_open_deliveries,
+    get_current_date,
+    is_coupon_redeemed,
+    late_delivery_last60d,
+)
 
 # Import agent memory functions
-from _agent_memory_crud import update_customer_support_history, read_customer_support_history, delete_customer_support_history
+from _agent_memory_crud import (
+    get_langgraph_persistence,
+    update_customer_support_history,
+    read_customer_support_history,
+    delete_customer_support_history,
+)
 
-# Setup
+logger = logging.getLogger(__name__)
+AGENT_VERSION = "0.0.7"
+
+# Keep the original synchronous LLM and tool setup.
 llm = ChatOpenAI(
     model="gpt-4.1-mini",
-    temperature=0.5)
-
+    temperature=0.5,
+)
 summary_llm = ChatOpenAI(
     model="gpt-4.1-nano",
-    temperature=0.5)
+    temperature=0.5,
+)
 
 tools = [get_product_availability]
 tools_by_name = {tool.name: tool for tool in tools}
 
 llm_check_inventory_with_tools = ChatOpenAI(
-    model="gpt-4.1-mini",
-    temperature=0.5).bind_tools(tools)
+    model="gpt-4.1-mini", temperature=0.5
+).bind_tools(tools)
+
 
 """
-This needs to be changed. Async should only be used if there are multiple concurrent calls within the agent, celery handles asynchronous execution so agent should be synchronous
+Async should only be used if there are multiple concurrent calls within the agent, celery handles asynchronous execution so agent should be synchronous
 https://docs.langchain.com/oss/python/langgraph/use-graph-api#async
 
 """
 
+
 # Nodes
-def classify_email(state: EmailAgentState) -> Command[Literal["get_comprehensive_product_query", "find_customer_order"]]:
+def classify_email(
+    state: EmailAgentState,
+) -> Command[Literal["get_comprehensive_product_query", "find_customer_order"]]:
     """
-    Use LLM to classify email topic and urgency, then route accordingly. 
+    Use LLM to classify email topic and urgency, then route accordingly.
 
     Reads from memory to classify correctly and updates memory.
     """
+
     structured_llm = llm.with_structured_output(EmailCharacteristics)
-    
-    conversation_summary = read_customer_support_history(state.customer_id, state.case_id) # Dict or none
+
+    conversation_summary = read_customer_support_history(
+        state.customer_id, state.case_id
+    )  # Dict or none
 
     if not conversation_summary:
+
         conversation_summary_formatted = "No history available"
+
     else:
-        conversation_summary_formatted = "\n".join([f'-{v}' for v in conversation_summary.values()])
+
+        conversation_summary_formatted = "\n".join(
+            [f"-{v}" for v in conversation_summary.values()]
+        )
 
     # Format the prompt on-demand, not stored in state
+
     classification_prompt = f"""
+
     Analyze this email from a customer and classify it. Use the email conversation history to gain context on this email if necessary. 
 
     Email: 
@@ -67,9 +106,9 @@ def classify_email(state: EmailAgentState) -> Command[Literal["get_comprehensive
 
     Email history summary:
     {conversation_summary_formatted}
-        
+
     Provide classification including topic, urgency, and provide a summary, if there are multiple request types in the email, you are unsure, or no reply is needed classify topic as 'other'. If the customer has sent an email with the same meaning that occurs more than three times in the email history, classify urgency as urgent.
-    
+
     Follow this guide for classifying topics:
     - product_availability_or_recommendation: Question about the availability of a product or a request for product recommendation (related to sports equipment)
     - delivery_delay: States that a delivery is late
@@ -87,45 +126,54 @@ def classify_email(state: EmailAgentState) -> Command[Literal["get_comprehensive
     # Get structured response directly as dict
     classification = structured_llm.invoke(classification_prompt)
 
-    # Determine next node based on classification    
-    if classification.topic == 'product_availability_or_recommendation':
+    # Determine next node based on classification
+    if classification.topic == "product_availability_or_recommendation":
         goto = "get_comprehensive_product_query"
-    elif classification.topic == 'delivery_delay':
-        goto = 'find_customer_order'
+    elif classification.topic == "delivery_delay":
+        goto = "find_customer_order"
     else:
-        print('email could not be classified and is routed to human escalation')
+        print("email could not be classified and is routed to human escalation")
         goto = "other"
+
     # print(conversation_summary_formatted)
     # print("Summary:", classification.summary)
     # print("Classification:", classification.topic)
     # print("urgency:", classification.urgency)
-    
     # Update memory with summary of customer email
+
     update_customer_support_history(
         state.customer_id,
         state.case_id,
         classification.summary,
-        conversation_summary,       # None or a dictionary
-        True)
+        conversation_summary,  # None or a dictionary
+        True,
+    )
 
-    if classification.urgency == 'urgent' or goto == 'other':
+    if classification.urgency == "urgent" or goto == "other":
+
         return Command(
-            update={"classification": classification,
-                    'actions': [{"Action": "Human_escalation"}]
-                    },
-            goto='send_response_to_backend'
+            update={
+                "classification": classification,
+                "actions": [{"Action": "Human_escalation"}],
+            },
+            goto="send_response_to_backend",
         )
 
     # Update state data and select the next node (goto)
+
     return Command(
         update={"classification": classification},
-        goto=goto
+        goto=goto,
     )
 
-def find_customer_order(state: EmailAgentState) -> Command[Literal["write_response", "check_deliveries"]]:
+
+def find_customer_order(
+    state: EmailAgentState,
+) -> Command[Literal["write_response", "check_deliveries"]]:
     """
     - Prompt the LLM to extract the tracking_numbers provided by the customer.
     """
+
     product_match_prompt = f"""
     Identify the  tracking numbers in the client's email. 
     Tracking numbers are a combination of letters and integers such as: UPS987654321, FDX123456789
@@ -141,38 +189,38 @@ def find_customer_order(state: EmailAgentState) -> Command[Literal["write_respon
         message = "The customer has not provided a valid delivery tracking number in their email. Ask them to respond with valid information."
 
         return Command(
-            update = {'context': [message]},
-            goto = "write_response"
+            update={"context": [message]},
+            goto="write_response",
         )
 
     return Command(
-        update = {'delivery': response},
-        goto="check_deliveries"
+        update={"delivery": response},
+        goto="check_deliveries",
     )
+
 
 def check_deliveries(state: EmailAgentState):
     """
     - Check if there are any open deliveries
     - If there are, check for matches
-    - If there are matches, check for deliveries that 
+    - If there are matches, check for deliveries that
     """
 
     open_deliveries = get_customer_open_deliveries(state.customer_id)
+
     # Match open_deliveries with information extracted from email
+
     matches = []
     for d in open_deliveries:
         tracking_number = d[2]
         if tracking_number in state.delivery.tracking_number:
             matches.append(d)
-    
+
     # No matches
     if len(matches) == 0:
         message = f"The customer has provided tracking numbers {state.delivery.tracking_number} but they do not correspond with any of the customer's open deliveries."
 
-        return Command(
-            update = {'context': [message]},
-            goto = "write_response"
-        )
+        return Command(update={"context": [message]}, goto="write_response",)
 
     present_date = get_current_date()
     # Credit refunds and coupons
@@ -190,27 +238,58 @@ def check_deliveries(state: EmailAgentState):
             if actual_delivery is not None:
                 difference = present_date - expected_delivery_end
                 days_late = difference.days
-                new_context.append(f"Delivery id {delivery_id} and tracking number {tracking_number} shipped on {str(shipped_date)} is late by {days_late} days and a refund for {days_late} days of the delivery fee is being refunded to the customer.")
-                new_actions.append({"Action": "Refund_delivery_fee", "params": {"delivery_id": str(delivery_id), "days": str(days_late)}})
+                new_context.append(
+                    f"Delivery id {delivery_id} and tracking number {tracking_number} shipped on {str(shipped_date)} is late by {days_late} days and a refund for {days_late} days of the delivery fee is being refunded to the customer."
+                )
+                new_actions.append(
+                    {
+                        "Action": "Refund_delivery_fee",
+                        "params": {
+                            "delivery_id": str(delivery_id),
+                            "days": str(days_late),
+                        },
+                    }
+                )
+
             # item is not delivered yet
             elif actual_delivery is None:
-                new_context.append(f"Delivery id {delivery_id} and tracking number {tracking_number} shipped on {str(shipped_date)} is late and currently out on delivery refund of the delivery fee for the number of late days will be credited to the customer when delivered.")
-                new_actions.append({"Action": "Track_refund_delivery_fee", "params": {"delivery_id": str(delivery_id)}})
+                new_context.append(
+                    f"Delivery id {delivery_id} and tracking number {tracking_number} shipped on {str(shipped_date)} is late and currently out on delivery refund of the delivery fee for the number of late days will be credited to the customer when delivered."
+                )
+                new_actions.append(
+                    {
+                        "Action": "Track_refund_delivery_fee",
+                        "params": {"delivery_id": str(delivery_id)},
+                    }
+                )
 
-            # Create coupon if 
+            # Create coupon if
             # - There was a late closed delivery in the last 60 days
             ldl = late_delivery_last60d(state.customer_id)
             icr = is_coupon_redeemed(state.customer_id, delivery_id)
             if ldl and not icr:
-                new_context.append(f"Delivery id {delivery_id} and tracking number {tracking_number} is late and there was another late delivery within the last 60 days. A coupon for expedited delivery is created and offered to the customer which can be used on the next order.")
-                new_actions.append({"Action": "Create_coupon", "params": {"delivery_id": str(delivery_id), "customer_id": str(state.customer_id)}})
+                new_context.append(
+                    f"Delivery id {delivery_id} and tracking number {tracking_number} is late and there was another late delivery within the last 60 days. A coupon for expedited delivery is created and offered to the customer which can be used on the next order."
+                )
+                new_actions.append(
+                    {
+                        "Action": "Create_coupon",
+                        "params": {
+                            "delivery_id": str(delivery_id),
+                            "customer_id": str(state.customer_id),
+                        },
+                    }
+                )
+
         # item is not late and an open dlivery
         else:
-            new_context.append(f"Delivery id {delivery_id} and tracking number {tracking_number} shipped on {str(shipped_date)} has not been delivered yet, and this delivery is still on time. Ask the customer to be patient.")
+            new_context.append(
+                f"Delivery id {delivery_id} and tracking number {tracking_number} shipped on {str(shipped_date)} has not been delivered yet, and this delivery is still on time. Ask the customer to be patient."
+            )
 
     # Despite using pydantic, state is updated with this syntax not state.new_context. This is possible because this is a LangGraph
-    return {'context': new_context,
-            'actions': new_actions}
+    return {"context": new_context, "actions": new_actions,}
+
 
 def get_comprehensive_product_query(state: EmailAgentState) -> str:
     """
@@ -244,6 +323,8 @@ def get_comprehensive_product_query(state: EmailAgentState) -> str:
     - For string columns, apply the lower() function to both sides
     - If the question cannot be answered with the schema, return: CANNOT_ANSWER
 
+
+
     Schema:
     Table: shoe_characteristics
     Columns:
@@ -268,9 +349,12 @@ def get_comprehensive_product_query(state: EmailAgentState) -> str:
         [SystemMessage(content=text2sql_prompt)] + [HumanMessage(query)]
     )
 
-    return {'closest_product_sql_query': response.content}
+    return {"closest_product_sql_query": response.content}
 
-def match_closest_product(state: EmailAgentState) -> Command[Literal["check_inventory_llm_call"]]:
+
+def match_closest_product(
+    state: EmailAgentState,
+) -> Command[Literal["check_inventory_llm_call"]]:
     """
     Email -> sql template -> results -> analyse results
     - Product name: Do not use
@@ -280,14 +364,14 @@ def match_closest_product(state: EmailAgentState) -> Command[Literal["check_inve
     Prompt the LLM to determine if there if there are products that matches the description(s) provided by the customer.
 
     This system can be improved where tags are extracted from the product descriptions and used to match against customer requirements.
-
     """
-    #valid_brands = get_unique_list('brand')
-    #valid_colors = get_unique_list('color')
-    #valid_materials = get_unique_list('material')
-    #print('-------------------------------------------------')
-    #raise ValueError("This is a manually throws error.")
-    
+
+    # valid_brands = get_unique_list('brand')
+    # valid_colors = get_unique_list('color')
+    # valid_materials = get_unique_list('material')
+    # print('-------------------------------------------------')
+    # raise ValueError("This is a manually throws error.")
+
     sql_query = state.closest_product_sql_query
 
     # Check without filters. THIS IS A BAD OPTION BUT ALLOWS GRACEFUL HANDLING
@@ -319,6 +403,7 @@ def match_closest_product(state: EmailAgentState) -> Command[Literal["check_inve
             update={"messages": [AIMessage(content=response)]},    # Adds to messages not replace. We don't want to save the response metadata to the state,
             goto="check_inventory_llm_call"
         )
+
 
 def check_inventory_llm_call(state: EmailAgentState):
     """ 
@@ -444,41 +529,37 @@ def send_response_to_backend(state: EmailAgentState) -> dict:
     - Actions
     
     """
-    
+    # Print the email response
     print(state.email_response)
+    # Print the state contextual clues gathered
     print('Context:', state.context)
+    # Print the state actions
     print('Actions:', state.actions)
+    # Send the email to the backend
     print(state.email_response_summary)
     if state.send_backend:
         print('send backend status:', state.send_backend)
 
-from langgraph.checkpoint.memory import MemorySaver
-from langgraph.types import RetryPolicy
-import uuid
-from psycopg import OperationalError, InterfaceError
-from psycopg.errors import SyntaxError
-from openai import RateLimitError, APIConnectionError, BadRequestError
 
 workflow = StateGraph(EmailAgentState)
-
 # Explicit mention of the error type is required for retrying to work
 # API/tool time outs, network, wrong model output
-
 all_retrypolicy = RetryPolicy(
-    max_attempts=3, 
+    max_attempts=3,
     initial_interval=1.0,
     backoff_factor=2.0,
     retry_on=[
-        ConnectionRefusedError, 
-        ConnectionError, 
-        SyntaxError, 
-        OperationalError, 
+        ConnectionRefusedError,
+        ConnectionError,
+        PostgresSyntaxError,
+        OperationalError,
         InterfaceError,
         RateLimitError,
         APIConnectionError,
-        BadRequestError
-    ]
+        BadRequestError,
+    ],
 )
+
 
 # Add nodes with appropriate error handling
 workflow.add_node("classify_email", classify_email)
@@ -511,35 +592,85 @@ workflow.add_edge("check_deliveries", "write_response")
 workflow.add_edge("write_response", "send_response_to_backend")
 workflow.add_edge("send_response_to_backend", END)
 
-# Compile with checkpointer for persistence
-memory = MemorySaver()
-app = workflow.compile(checkpointer=memory)
 
-def invoke_agent(initial_state:dict, job_id:str):
+# -----------------------------------------------------------------------------
+# Graph compilation with lazy checkpointing local to celery worker using global variables
+# -----------------------------------------------------------------------------
+
+_graph = None
+_graph_checkpointer = None
+_graph_store = None
+_graph_lock = threading.RLock()
+
+def get_agent_graph():
     """
-    This function starts the agent workflow which orchestrates the agent actions and sending the response to the backend. If state.send_backend is False such as during testing, it will not send a http request to the backend
+    Compile lazily with process-local resources from _agent_memory_crud.
 
-    thread_id is the same as job_id. This enables retries, and human in the loop
+    Celery runs multiple worker processes, and each worker should have its own database resources
 
-    Langgraph is designed to return the entire state (streaming, branching, retries, HITL...)
+    The helper checks the current PID and owns its pool. If Celery forks or the
+    helper reopens its pool, these resource identities change and we recompile.
+    The process within a Celery task reuses:
+    - Compiled graph
+    - Database connection pool resources
+
+    No DB connections are constructed or opened by this module.
     """
-    
-    config = {"configurable": 
-                {"thread_id": str(job_id)}
-             }
+    global _graph, _graph_checkpointer, _graph_store
 
-    graph_state = app.invoke(initial_state, config=config) # this returns a dictionary
+    checkpointer, store = get_langgraph_persistence() # [PostgresSaver, PostgresStore] or raise
 
-    eval_output = {
-        'email_response': graph_state.get('email_response', ''), # this is buggy, unsure why
-        'context': graph_state['context'],
-        'actions': graph_state['actions']
+    # Existing 
+    if (
+        _graph is not None
+        and _graph_checkpointer is checkpointer
+        and _graph_store is store
+    ):
+        return _graph
+
+    with _graph_lock:
+        if (
+            _graph is not None
+            and _graph_checkpointer is checkpointer
+            and _graph_store is store
+        ):
+            return _graph
+
+        graph = workflow.compile(checkpointer=checkpointer, store=store)
+        _graph = graph
+        _graph_checkpointer = checkpointer
+        _graph_store = store
+        logger.info("LangGraph workflow compiled with helper-managed persistence")
+        return graph
+
+
+class _LazyGraph:
+    """Preserve `from email_agent import app` without eager initialization."""
+
+    def __getattr__(self, name):
+        return getattr(get_agent_graph(), name)
+
+
+app = _LazyGraph()
+
+
+def invoke_agent(initial_state: dict, job_id: str):
+    """Compatibility entrypoint, returning the original evaluation payload.
+
+    Use customer/case as the graph thread so follow-ups use the same history;
+    job_id remains a per-submission correlation ID. To resume an existing
+    historical checkpoint keyed by job_id, explicitly migrate its thread key.
+    """
+    customer_id = initial_state["customer_id"]
+    case_id = initial_state["case_id"]
+    thread_id = f"{customer_id}:{case_id}"
+
+    config = {"configurable": {"thread_id": thread_id}}
+
+    graph_state = app.invoke(initial_state, config=config)
+
+    return {
+        "email_response": graph_state.get("email_response", ""),
+        "context": graph_state.get("context"),
+        "actions": graph_state.get("actions"),
     }
-
-    return eval_output
-
-
-# ======= Test the agent ==========
-print("Agent Version: 0.0.6")
-
-    

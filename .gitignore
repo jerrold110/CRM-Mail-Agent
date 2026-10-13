@@ -181,4 +181,4 @@ cython_debug/
 .cursorignore
 .cursorindexingignore
 
-test*
+adhoc*

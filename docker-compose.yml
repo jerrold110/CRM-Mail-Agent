@@ -1,32 +1,182 @@
-# docker-compose up --build -d
+# docker-compose up --build <service_name> -d
 services:
-  redis_broker:
-    build: ./backend/BrokerRedis
-    container_name: dc_redis_broker
-    ports:
-      - "6379:6379"
-  redis_commander:
-    build: ./backend/BrokerRedisCommander
-    container_name: dc_redis_commander
-    environment:
-      - REDIS_HOSTS=local:dc_redis_broker:6379
-    ports:
-      - "8081:8081"
-    depends_on:
-      - redis_broker
+
   internal_database_sql:
-    build: ./backend/InternalDatabaseSQL
-    container_name: dc_internal_database
+      build: ./src/databaseSql
+      container_name: database
+      environment:
+        POSTGRES_USER: admin
+        POSTGRES_PASSWORD: admin
+        POSTGRES_DB: company
+      ports:
+        - "127.0.0.1:5432:5432"
+      # volumes:
+      # - postgres_data:/var/lib/postgresql/data
+      # Required health check for database-memory-setup
+      healthcheck:
+        test:
+          - CMD-SHELL
+          - >-
+            PGPASSWORD="$$POSTGRES_PASSWORD"
+            psql -h 127.0.0.1 -p 5432
+            -U "$$POSTGRES_USER"
+            -d "$$POSTGRES_DB"
+            -v ON_ERROR_STOP=1 -qAt
+            -c 'SELECT 1' | grep -qx '1'
+        interval: 20s
+        timeout: 5s
+        retries: 10
+        start_period: 30s
+
+  database_setup:
+    build:
+      context: .
+      dockerfile: src/DBmemorysetup/Dockerfile
+    container_name: db_memory_setup
+    environment:
+      DB_HOST: internal_database_sql
+      DB_PORT: 5432
+      DB_USER: admin
+      DB_PASSWORD: admin
+      DB_MEMORY_DATABASE: agent_memory
+    depends_on:
+      internal_database_sql:
+        condition: service_healthy
+    restart: "no"
+
+  pgbouncer:
+    image: ghcr.io/cloudnative-pg/pgbouncer:1.26.0
+    environment:
+      DB_HOST: internal_database_sql
+      DB_PORT: "5432"
+      DB_USER: admin
+      DB_PASSWORD: admin
+      DB_DATABASE: company
+      DB_MEMORY_DATABASE: agent_memory
+      PGBOUNCER_LISTEN_PORT: "6432"
+      PGBOUNCER_POOL_MODE: transaction
+      PGBOUNCER_DEFAULT_POOL_SIZE: "10"
+      PGBOUNCER_MAX_CLIENT_CONN: "200"
+      PGBOUNCER_MAX_DB_CONNECTIONS: "20"
+    volumes:
+      - ./src/pgbouncer/start.sh:/etc/pgbouncer/start.sh:ro
+    entrypoint:
+      - /bin/sh
+      - /etc/pgbouncer/start.sh
+    depends_on:
+      internal_database_sql:
+        condition: service_healthy
+      database_setup:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          export PGPASSWORD="$$DB_PASSWORD";
+          psql -w -h 127.0.0.1 -p 6432
+          -U "$$DB_USER" -d "$$DB_DATABASE"
+          -v ON_ERROR_STOP=1 -qAt
+          -c 'SELECT 1' | grep -qx '1'
+          &&
+          psql -w -h 127.0.0.1 -p 6432
+          -U "$$DB_USER" -d "$$DB_MEMORY_DATABASE"
+          -v ON_ERROR_STOP=1 -qAt
+          -c 'SELECT 1' | grep -qx '1'
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    # No host port published: only other Compose services use PgBouncer.
+
+  redis_broker:
+    build: ./src/redis
+    container_name: redis_broker
     ports:
-      - "5432:5432"
-  # Remember to change the database config host address to the service name dc_internal_database in agent/app/config.cfg
-  agent_service_w_queue:
-    build: ./agent
-    container_name: dc_agent_service_w_queue
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  redis_commander:
+    build: ./src/redisCommander
+    container_name: redis_commander
+    environment:
+      REDIS_HOSTS: local:redis_broker:6379
+    ports:
+      - "127.0.0.1:8081:8081"
+    depends_on:
+      redis_broker:
+        condition: service_healthy
+    restart: unless-stopped
+
+  api_rest:
+    build:
+      context: .
+      dockerfile: src/api_rest/Dockerfile
+    container_name: api_rest
     ports:
       - "8000:8000"
+    environment:
+      REDIS: redis_broker:6379
     depends_on:
-      - redis_broker
-      - redis_commander
-      - internal_database_sql
+      redis_broker:
+        condition: service_healthy
+      pgbouncer:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/openapi.json', timeout=3).close()"
+      interval: 20s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    restart: no
+  
+  celery_worker:
+    build:
+      context: .
+      dockerfile: src/agent/Dockerfile
+    container_name: celery_worker
+    environment:
+      REDIS: redis_broker:6379
+
+      # Business database
+      DB_HOST: pgbouncer
+      DB_PORT: "6432"
+      DB_DATABASE: company
+      DB_USER: admin
+      DB_PASSWORD: admin
+      # LangGraph memory database
+      DB_MEMORY_HOST: pgbouncer
+      DB_MEMORY_PORT: "6432"
+      DB_MEMORY_DATABASE: agent_memory
+      DB_SSLMODE: disable  # Encryption connection; require TLS for remote production DBs.
+      DB_POOL_MIN_SIZE: "0"
+      DB_POOL_MAX_SIZE: "2"
+      DB_POOL_TIMEOUT: "10"
+      
+      # Application environment variables from .env
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY}
+      LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY}
+      LANGFUSE_BASE_URL: ${LANGFUSE_BASE_URL}
+    depends_on:
+      redis_broker:
+        condition: service_healthy
+      internal_database_sql:
+        condition: service_healthy
+      database_setup:
+        condition: service_completed_successfully
+      pgbouncer:
+        condition: service_healthy
+      api_rest:
+        condition: service_healthy
+    command: celery -A agent_queue_tasks:app worker --loglevel=INFO
     
