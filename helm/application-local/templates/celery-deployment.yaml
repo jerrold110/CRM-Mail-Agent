@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-celery-worker
+  labels:
+    app: {{ .Release.Name }}-celery-worker
+spec:
+  replicas: {{ .Values.celeryWorker.replicas }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-celery-worker
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-celery-worker
+    spec:
+      # This entire block is to
+      # Checks TCP connectivity to Redis and PgBouncer
+      # Checks that the API returns HTTP 200 from /openapi.json
+      # Runs only at Pod initialization, not continuously.
+      initContainers:
+        - name: wait-for-dependencies
+          image: "{{ .Values.celeryWorker.image.repository }}:{{ .Values.celeryWorker.image.tag }}"
+          imagePullPolicy: {{ .Values.celeryWorker.image.pullPolicy }}
+          command: ["python", "-c"]
+          args:
+            - |
+              import socket, time, urllib.request
+              deps = [
+                  ("{{ .Release.Name }}-redis-broker", {{ .Values.redisBroker.port }}),
+                  ("{{ .Release.Name }}-pgbouncer", {{ .Values.pgbouncer.port }}),
+              ]
+              url = "http://{{ .Release.Name }}-api-rest:{{ .Values.apiRest.port }}/openapi.json"
+              while True:
+                  try:
+                      for host, port in deps:
+                          with socket.create_connection((host, port), timeout=3):
+                              pass
+                      with urllib.request.urlopen(url, timeout=3) as response:
+                          if response.status != 200:
+                              raise RuntimeError(f"API status {response.status}")
+                      break
+                  except (OSError, RuntimeError) as exc:
+                      print(f"Waiting for Celery dependencies: {exc}", flush=True)
+                      time.sleep(3)
+      # This is the actual worker
+      containers:
+        - name: celery-worker
+          image: "{{ .Values.celeryWorker.image.repository }}:{{ .Values.celeryWorker.image.tag }}"
+          imagePullPolicy: {{ .Values.celeryWorker.image.pullPolicy }}
+          # Compose `command:` maps to Kubernetes `args:` (preserves image ENTRYPOINT).
+          args:
+            {{- toYaml .Values.celeryWorker.command | nindent 12 }}
+          env:
+            - name: REDIS
+              value: "{{ .Release.Name }}-redis-broker:{{ .Values.redisBroker.port }}"
+            - name: DB_HOST
+              value: {{ .Release.Name }}-pgbouncer
+            - name: DB_PORT
+              value: {{ .Values.pgbouncer.port | quote }}
+            - name: DB_DATABASE
+              value: {{ .Values.postgres.database | quote }}
+            - name: DB_USER
+              value: {{ .Values.postgres.user | quote }}
+            - name: DB_PASSWORD
+              value: {{ .Values.postgres.password | quote }}
+            - name: DB_MEMORY_HOST
+              value: {{ .Release.Name }}-pgbouncer
+            - name: DB_MEMORY_PORT
+              value: {{ .Values.pgbouncer.port | quote }}
+            - name: DB_MEMORY_DATABASE
+              value: {{ .Values.postgres.memoryDatabase | quote }}
+            - name: DB_SSLMODE
+              value: {{ .Values.celeryWorker.dbSslmode | quote }}
+            - name: DB_POOL_MIN_SIZE
+              value: {{ .Values.celeryWorker.dbPoolMinSize | quote }}
+            - name: DB_POOL_MAX_SIZE
+              value: {{ .Values.celeryWorker.dbPoolMaxSize | quote }}
+            - name: DB_POOL_TIMEOUT
+              value: {{ .Values.celeryWorker.dbPoolTimeout | quote }}
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.celeryWorker.existingSecret | quote }}
+                  key: OPENAI_API_KEY
+            - name: LANGFUSE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.celeryWorker.existingSecret | quote }}
+                  key: LANGFUSE_SECRET_KEY
+            - name: LANGFUSE_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.celeryWorker.existingSecret | quote }}
+                  key: LANGFUSE_PUBLIC_KEY
+            - name: LANGFUSE_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.celeryWorker.existingSecret | quote }}
+                  key: LANGFUSE_BASE_URL
+          # No TCP/HTTP readiness probe: Celery has no HTTP server.
+          # Add a Celery-specific health check after confirming its queue configuration.
+          resources:
+            {{- toYaml .Values.celeryWorker.resources | nindent 12 }}

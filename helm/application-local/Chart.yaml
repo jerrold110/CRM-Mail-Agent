@@ -1,0 +1,6 @@
+apiVersion: v2
+name: application
+description: Local Kubernetes chart for PostgreSQL, PgBouncer, Redis, API, and Celery
+version: 0.2.0
+appVersion: "0.1.0"
+type: application

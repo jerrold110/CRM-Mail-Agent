@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-redis-commander
+  labels:
+    app: {{ .Release.Name }}-redis-commander
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-redis-commander
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-redis-commander
+    spec:
+      initContainers:
+        - name: wait-for-redis
+          image: "{{ .Values.redisBroker.image.repository }}:{{ .Values.redisBroker.image.tag }}"
+          imagePullPolicy: {{ .Values.redisBroker.image.pullPolicy }}
+          command:
+            - sh
+            - -ec
+            - |
+              until redis-cli -h {{ .Release.Name }}-redis-broker \
+                -p {{ .Values.redisBroker.port }} ping | grep -qx PONG; do
+                echo 'Waiting for Redis...'
+                sleep 2
+              done
+      containers:
+        - name: redis-commander
+          image: "{{ .Values.redisCommander.image.repository }}:{{ .Values.redisCommander.image.tag }}"
+          imagePullPolicy: {{ .Values.redisCommander.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.redisCommander.port }}
+          env:
+            - name: REDIS_HOSTS
+              value: "local:{{ .Release.Name }}-redis-broker:{{ .Values.redisBroker.port }}"
+          # No healthcheck in Compose for Redis Commander.
+          resources:
+            {{- toYaml .Values.redisCommander.resources | nindent 12 }}

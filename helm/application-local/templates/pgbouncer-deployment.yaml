@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-pgbouncer
+  labels:
+    app: {{ .Release.Name }}-pgbouncer
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-pgbouncer
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-pgbouncer
+    spec:
+      initContainers:
+        - name: wait-for-memory-database
+          image: "{{ .Values.postgres.image.repository }}:{{ .Values.postgres.image.tag }}"
+          imagePullPolicy: {{ .Values.postgres.image.pullPolicy }}
+          command:
+            - sh
+            - -ec
+            - |
+              for db in "$DB_DATABASE" "$DB_MEMORY_DATABASE"; do
+                until PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" \
+                  -U "$DB_USER" -d "$db" -qAt -c 'SELECT 1' 2>/dev/null \
+                  | grep -qx '1'; do
+                  echo "Waiting for PostgreSQL database: $db"
+                  sleep 3
+                done
+              done
+          env:
+            - name: DB_HOST
+              value: {{ .Release.Name }}-internal-database-sql
+            - name: DB_PORT
+              value: {{ .Values.postgres.port | quote }}
+            - name: DB_USER
+              value: {{ .Values.postgres.user | quote }}
+            - name: DB_PASSWORD
+              value: {{ .Values.postgres.password | quote }}
+            - name: DB_DATABASE
+              value: {{ .Values.postgres.database | quote }}
+            - name: DB_MEMORY_DATABASE
+              value: {{ .Values.postgres.memoryDatabase | quote }}
+      containers:
+        - name: pgbouncer
+          image: "{{ .Values.pgbouncer.image.repository }}:{{ .Values.pgbouncer.image.tag }}"
+          imagePullPolicy: {{ .Values.pgbouncer.image.pullPolicy }}
+          ports:
+            - name: pgbouncer
+              containerPort: {{ .Values.pgbouncer.port }}
+          env:
+            - name: DB_HOST
+              value: {{ .Release.Name }}-internal-database-sql
+            - name: DB_PORT
+              value: {{ .Values.postgres.port | quote }}
+            - name: DB_USER
+              value: {{ .Values.postgres.user | quote }}
+            - name: DB_PASSWORD
+              value: {{ .Values.postgres.password | quote }}
+            - name: DB_DATABASE
+              value: {{ .Values.postgres.database | quote }}
+            - name: DB_MEMORY_DATABASE
+              value: {{ .Values.postgres.memoryDatabase | quote }}
+            - name: PGBOUNCER_LISTEN_PORT
+              value: {{ .Values.pgbouncer.port | quote }}
+            - name: PGBOUNCER_POOL_MODE
+              value: {{ .Values.pgbouncer.poolMode | quote }}
+            - name: PGBOUNCER_DEFAULT_POOL_SIZE
+              value: {{ .Values.pgbouncer.defaultPoolSize | quote }}
+            - name: PGBOUNCER_MAX_CLIENT_CONN
+              value: {{ .Values.pgbouncer.maxClientConn | quote }}
+            - name: PGBOUNCER_MAX_DB_CONNECTIONS
+              value: {{ .Values.pgbouncer.maxDbConnections | quote }}
+          # Same two SQL checks as Compose (company AND memory database).
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - >-
+                  export PGPASSWORD="$DB_PASSWORD";
+                  psql -w -h 127.0.0.1 -p {{ .Values.pgbouncer.port }}
+                  -U "$DB_USER" -d "$DB_DATABASE"
+                  -v ON_ERROR_STOP=1 -qAt
+                  -c 'SELECT 1' | grep -qx '1'
+                  &&
+                  psql -w -h 127.0.0.1 -p {{ .Values.pgbouncer.port }}
+                  -U "$DB_USER" -d "$DB_MEMORY_DATABASE"
+                  -v ON_ERROR_STOP=1 -qAt
+                  -c 'SELECT 1' | grep -qx '1'
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 10
+          resources:
+            {{- toYaml .Values.pgbouncer.resources | nindent 12 }}

@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-api-rest
+  labels:
+    app: {{ .Release.Name }}-api-rest
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-api-rest
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-api-rest
+    spec:
+      initContainers:
+        - name: wait-for-dependencies
+          image: "{{ .Values.apiRest.image.repository }}:{{ .Values.apiRest.image.tag }}"
+          imagePullPolicy: {{ .Values.apiRest.image.pullPolicy }}
+          command: ["python", "-c"]
+          args:
+            - |
+              import socket, time
+              deps = [
+                  ("{{ .Release.Name }}-redis-broker", {{ .Values.redisBroker.port }}),
+                  ("{{ .Release.Name }}-pgbouncer", {{ .Values.pgbouncer.port }}),
+              ]
+              while True:
+                  try:
+                      for host, port in deps:
+                          with socket.create_connection((host, port), timeout=3):
+                              pass
+                      break
+                  except OSError as exc:
+                      print(f"Waiting for API dependencies: {exc}", flush=True)
+                      time.sleep(3)
+      containers:
+        - name: api-rest
+          image: "{{ .Values.apiRest.image.repository }}:{{ .Values.apiRest.image.tag }}"
+          imagePullPolicy: {{ .Values.apiRest.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.apiRest.port }}
+          env:
+            - name: REDIS
+              value: "{{ .Release.Name }}-redis-broker:{{ .Values.redisBroker.port }}"
+          # Exact Compose urllib healthcheck, executed inside the container.
+          readinessProbe:
+            exec:
+              command:
+                - python
+                - -c
+                - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/openapi.json', timeout=3).close()"
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 10
+          resources:
+            {{- toYaml .Values.apiRest.resources | nindent 12 }}

@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-redis-broker
+  labels:
+    app: {{ .Release.Name }}-redis-broker
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      # Avoid two independent Redis brokers serving requests at once.
+      maxSurge: 0
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-redis-broker
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-redis-broker
+    spec:
+      containers:
+        - name: redis-broker
+          image: "{{ .Values.redisBroker.image.repository }}:{{ .Values.redisBroker.image.tag }}"
+          imagePullPolicy: {{ .Values.redisBroker.image.pullPolicy }}
+          ports:
+            - name: redis
+              containerPort: {{ .Values.redisBroker.port }}
+          # Exact Compose healthcheck command.
+          readinessProbe:
+            exec:
+              command: ["redis-cli", "ping"]
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 10
+          resources:
+            {{- toYaml .Values.redisBroker.resources | nindent 12 }}

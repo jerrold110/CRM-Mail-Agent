@@ -1,0 +1,24 @@
+# Docker Desktop Kubernetes only: images must be present in the node image store.
+# The base values are already configured for local images; this explicit file
+# keeps the local/cloud split obvious when ECR is introduced later.
+postgres:
+  image:
+    pullPolicy: Never
+databaseSetup:
+  image:
+    pullPolicy: Never
+pgbouncer:
+  image:
+    pullPolicy: Never
+redisBroker:
+  image:
+    pullPolicy: Never
+redisCommander:
+  image:
+    pullPolicy: Never
+apiRest:
+  image:
+    pullPolicy: Never
+celeryWorker:
+  image:
+    pullPolicy: Never

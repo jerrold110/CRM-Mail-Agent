@@ -1,0 +1,12 @@
+Local URLs (use these commands from another terminal):
+
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ .Release.Name }}-api-rest 8000:{{ .Values.apiRest.port }}
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ .Release.Name }}-redis-commander 8081:{{ .Values.redisCommander.port }}
+
+Status:
+
+  kubectl -n {{ .Release.Namespace }} get pods,svc,job
+  kubectl -n {{ .Release.Namespace }} logs job/{{ .Release.Name }}-database-setup
+
+The application needs Secret '{{ .Values.celeryWorker.existingSecret }}' in namespace '{{ .Release.Namespace }}'.
+PostgreSQL is deliberately ephemeral; see helm/README.md before resetting/reinstalling.

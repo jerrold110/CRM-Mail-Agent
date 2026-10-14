@@ -1,0 +1,114 @@
+# Single release for all seven Compose services.
+# Services use Kubernetes DNS names with hyphens, not Compose underscores.
+postgres:
+  image:
+    repository: portfolio/internal-database-sql
+    tag: local
+    pullPolicy: Never
+  user: admin
+  password: admin # Demo-only; deliberately a plain environment variable.
+  database: company
+  memoryDatabase: agent_memory
+  port: 5432
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
+
+# One-shot Python script; remains a regular Job (not an Argo/Helm hook).
+databaseSetup:
+  image:
+    repository: portfolio/database-setup
+    tag: local
+    pullPolicy: Never
+  backoffLimit: 6
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      memory: 256Mi
+
+pgbouncer:
+  image:
+    repository: portfolio/pgbouncer
+    tag: local
+    pullPolicy: Never
+  port: 6432
+  poolMode: transaction
+  defaultPoolSize: "10"
+  maxClientConn: "200"
+  maxDbConnections: "20"
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      memory: 256Mi
+
+redisBroker:
+  image:
+    repository: portfolio/redis-broker
+    tag: local
+    pullPolicy: Never
+  port: 6379
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      memory: 256Mi
+
+redisCommander:
+  image:
+    repository: portfolio/redis-commander
+    tag: local
+    pullPolicy: Never
+  port: 8081
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      memory: 256Mi
+
+apiRest:
+  image:
+    repository: portfolio/api-rest
+    tag: local
+    pullPolicy: Never
+  port: 8000
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
+
+celeryWorker:
+  image:
+    repository: portfolio/celery-worker
+    tag: local
+    pullPolicy: Never
+  replicas: 1
+  command:
+    - celery
+    - -A
+    - agent_queue_tasks:app
+    - worker
+    - --loglevel=INFO
+    - --concurrency=1 # important for preventing OOM
+  dbSslmode: disable
+  dbPoolMinSize: "0"
+  dbPoolMaxSize: "2"
+  dbPoolTimeout: "10"
+  # Secret is created outside Helm so its values are not stored in the chart/repo.
+  existingSecret: portfolio-app-credentials
+  resources:
+    requests:
+      cpu: 100m # 10% of a CPU, 1000m is 100%
+      memory: 512Mi
+    limits:
+      memory: 2Gi

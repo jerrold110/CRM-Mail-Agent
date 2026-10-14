@@ -1,0 +1,52 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-database-setup
+spec:
+  backoffLimit: {{ .Values.databaseSetup.backoffLimit }}
+  template:
+    spec:
+      restartPolicy: Never
+      initContainers:
+        - name: wait-for-postgres
+          image: "{{ .Values.postgres.image.repository }}:{{ .Values.postgres.image.tag }}"
+          imagePullPolicy: {{ .Values.postgres.image.pullPolicy }}
+          command:
+            - sh
+            - -ec
+            - |
+              until PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" \
+                -U "$DB_USER" -d "$DB_DATABASE" -v ON_ERROR_STOP=1 -qAt -c 'SELECT 1' 2>/dev/null \
+                | grep -qx '1'; do
+                echo 'Waiting for PostgreSQL...'
+                sleep 3
+              done
+          env:
+            - name: DB_HOST
+              value: {{ .Release.Name }}-internal-database-sql
+            - name: DB_PORT
+              value: {{ .Values.postgres.port | quote }}
+            - name: DB_USER
+              value: {{ .Values.postgres.user | quote }}
+            - name: DB_PASSWORD
+              value: {{ .Values.postgres.password | quote }}
+            - name: DB_DATABASE
+              value: {{ .Values.postgres.database | quote }}
+      containers:
+        - name: database-setup
+          image: "{{ .Values.databaseSetup.image.repository }}:{{ .Values.databaseSetup.image.tag }}"
+          imagePullPolicy: {{ .Values.databaseSetup.image.pullPolicy }}
+          env:
+            - name: DB_HOST
+              value: {{ .Release.Name }}-internal-database-sql
+            - name: DB_PORT
+              value: {{ .Values.postgres.port | quote }}
+            - name: DB_USER
+              value: {{ .Values.postgres.user | quote }}
+            - name: DB_PASSWORD
+              value: {{ .Values.postgres.password | quote }}
+            - name: DB_MEMORY_DATABASE
+              value: {{ .Values.postgres.memoryDatabase | quote }}
+          # Keep the default CMD/ENTRYPOINT from src/DBmemorysetup/Dockerfile.
+          resources:
+            {{- toYaml .Values.databaseSetup.resources | nindent 12 }}
