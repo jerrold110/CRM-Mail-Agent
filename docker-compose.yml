@@ -10,6 +10,7 @@ services:
         POSTGRES_DB: company
       ports:
         - "127.0.0.1:5432:5432"
+      # 
       # volumes:
       # - postgres_data:/var/lib/postgresql/data
       # Required health check for database-memory-setup
@@ -45,7 +46,9 @@ services:
     restart: "no"
 
   pgbouncer:
-    image: ghcr.io/cloudnative-pg/pgbouncer:1.26.0
+    build:
+      context: ./src/pgbouncer
+      dockerfile: Dockerfile
     environment:
       DB_HOST: internal_database_sql
       DB_PORT: "5432"
@@ -58,11 +61,6 @@ services:
       PGBOUNCER_DEFAULT_POOL_SIZE: "10"
       PGBOUNCER_MAX_CLIENT_CONN: "200"
       PGBOUNCER_MAX_DB_CONNECTIONS: "20"
-    volumes:
-      - ./src/pgbouncer/start.sh:/etc/pgbouncer/start.sh:ro
-    entrypoint:
-      - /bin/sh
-      - /etc/pgbouncer/start.sh
     depends_on:
       internal_database_sql:
         condition: service_healthy

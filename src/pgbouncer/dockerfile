@@ -1,0 +1,5 @@
+FROM ghcr.io/cloudnative-pg/pgbouncer:1.26.0
+
+COPY start.sh /etc/pgbouncer/start.sh
+
+ENTRYPOINT ["/bin/sh", "/etc/pgbouncer/start.sh"]
